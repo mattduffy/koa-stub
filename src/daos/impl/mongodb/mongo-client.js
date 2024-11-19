@@ -19,6 +19,9 @@ Dotenv.config({ path: mongodbEnvPath, processEnv: mongoEnv, debug: showDebug })
 
 const clientDn = mongoEnv.MONGODB_CLIENT_DN
 const dbHost = mongoEnv.MONGODB_HOST
+const dbHost2 = mongoEnv.MONGODB_HOST_2
+const dbHost3 = mongoEnv.MONGODB_HOST_3
+const dbHost4 = mongoEnv.MONGODB_HOST_4
 const dbPort1 = mongoEnv.MONGODB_PORT_1
 const dbPort2 = mongoEnv.MONGODB_PORT_2
 const dbPort3 = mongoEnv.MONGODB_PORT_3
@@ -30,7 +33,7 @@ const clientPEMFile = path.resolve(root, mongoEnv.MONGODB_CLIENT_KEY)
 const dbCAKeyFile = path.resolve(root, mongoEnv.MONGODB_CAKEYFILE)
 // const clientPEMFile = encodeURIComponent(mongoEnv.MONGODB_CLIENT_KEY)
 // const dbCAKeyFile = encodeURIComponent(mongoEnv.MONGODB_CAKEYFILE)
-const uri = `mongodb://${clientDn}@${dbHost}:${dbPort1},${dbHost}:${dbPort2},${dbHost}:${dbPort3}/${dbName}?replicaSet=myReplicaSet&authMechanism=${authMechanism}&tls=true&tlsCertificateKeyFile=${clientPEMFile}&tlsCAFile=${dbCAKeyFile}&authSource=${authSource}&appName=${appName}`
+const uri = `mongodb://${clientDn}@${dbHost}:${dbPort1},${dbHost}:${dbPort2},${dbHost}:${dbPort3},${dbHost2}:${dbPort1},${dbHost3}:${dbPort1},${dbHost4}:${dbPort1}/${dbName}?replicaSet=myReplicaSet&authMechanism=${authMechanism}&tls=true&tlsCertificateKeyFile=${clientPEMFile}&tlsCAFile=${dbCAKeyFile}&authSource=${authSource}&appName=${appName}`
 
 // console.log('mongo-client.js >> root = ', root)
 // console.log(`mongo-client env path: ${mongodbEnvPath}`)
