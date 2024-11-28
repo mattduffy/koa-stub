@@ -36,15 +36,19 @@ class App {
   #encJWKKeyPath
 
   constructor(config = {}) {
-    const log = appLog.extend('constructor')
+    this.log = appLog.extend('constructor')
     // const error = appError.extend('constructor')
-    log('The App model constructor.')
+    this.log('The App model constructor.')
+    //
 
     this._keyDir = config.keyDir ?? './keys'
     this._dbHandle = config?.db
     this._db = config?.db.collection(COLLECTION)
-    this._siteName = config.siteName ?? process.env.SITE_NAME ?? 'website'
+    this._siteName = config?.siteName ?? config?.SITE_NAME ?? process.env.SITE_NAME ?? 'website'
     this._keys = config.keys ?? { signing: [], encrypting: [] }
+
+    this.RSA_SIG_KEY_FILENAME = config.appEnv.RSA_SIG_KEY_FILENAME
+    this.RSA_ENC_KEY_FILENAME = config.appEnv.RSA_ENC_KEY_FILENAME
     this.#cryptoKeys = new CryptoKeys({ dirs: { public: this._keyDir, private: this._keyDir } })
   }
 
@@ -121,7 +125,8 @@ class App {
         // set filename and path for keys
         // save keys to file system
         const keyIndex = numSigKeys
-        const filename = `app-${keyIndex}-${process.env.RSA_SIG_KEY_FILENAME}`
+        //
+        const filename = `app-${keyIndex}-${this.RSA_SIG_KEY_FILENAME}`
         const pubKeyPath = path.resolve(this._keyDir, `${filename}-public.pem`)
         const jwkeyPath = path.resolve(this._keyDir, `${filename}.jwk`)
         const priKeyPath = path.resolve(this._keyDir, `${filename}-private.pem`)
@@ -146,7 +151,7 @@ class App {
         // set filename and path for keys
         // save keys to file system
         const keyIndex = numEncKeys
-        const filename = `app-${keyIndex}-${process.env.RSA_ENC_KEY_FILENAME}`
+        const filename = `app-${keyIndex}-${this.RSA_ENC_KEY_FILENAME}`
         const pubKeyPath = path.resolve(this._keyDir, `${filename}-public.pem`)
         const jwkeyPath = path.resolve(this._keyDir, `${filename}.jwk`)
         const priKeyPath = path.resolve(this._keyDir, `${filename}-private.pem`)
@@ -204,8 +209,9 @@ class App {
    */
   async rotate() {
     const log = appLog.extend('rotate')
-    const error = appLog.extend('rotate')
-    log('Rotating server keys.')
+    // const error = appLog.extend('rotate')
+    this.log('help')
+    log(`Rotating server ${this._siteName} keys.`)
   }
 
   get signingPublicKey() {
@@ -292,6 +298,7 @@ class App {
 
   async #openKey(keyPath) {
     if (!keyPath) {
+      this.error('help')
       throw new Error('Missing required path to key file.')
     }
     try {
@@ -300,7 +307,6 @@ class App {
       throw new Error(e)
     }
   }
-
 }
 
 export {

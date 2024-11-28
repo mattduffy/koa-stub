@@ -27,6 +27,7 @@ export async function checkServerJWKs(ctx, next) {
       db: ctx.state.mongodb.client.db(ctx.state.mongodb.client.dbName),
       keyDir: ctx.app.dirs.keys,
       siteName: ctx.app.site,
+      appEnv: ctx.app.appEnv,
     }
     const theApp = new App(o)
     ctx.state.keys = await theApp.keys()
@@ -65,6 +66,7 @@ export async function getSessionUser(ctx, next) {
       ctx.app.emit('error', e, ctx)
       ctx.throw(500, 'Error while reconstituting the session.', e)
     }
+    log(`ctx.state.isAuthenticated: ${ctx.state.isAuthenticated}`)
   }
   try {
     await next()
