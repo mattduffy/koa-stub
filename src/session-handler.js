@@ -24,7 +24,7 @@ dotenv.config({ path: path.resolve(root, 'config/sessions.env'), processEnv: red
 // console.log('redis prefix: ', redisEnv.REDIS_KEY_PREFIX)
 // console.log('cacert: %o', process.env.REDIS_CACERT)
 
-const sentinelPort = redisEnv.SENTINEL_PORT || 36379
+const sentinelPort = redisEnv.REDIS_SENTINEL_PORT || 26379
 const redisConnOpts = {
   sentinels: [
     { host: redisEnv.REDIS_SENTINEL_01, port: sentinelPort },

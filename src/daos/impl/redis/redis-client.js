@@ -18,7 +18,7 @@ const showDebug = process.env.NODE_ENV !== 'production'
 const redisEnv = {}
 Dotenv.config({ path: path.resolve(root, 'config/redis.env'), processEnv: redisEnv, debug: showDebug })
 
-const sentinelPort = redisEnv.SENTINEL_PORT ?? 36379
+const sentinelPort = redisEnv.REDIS_SENTINEL_PORT ?? 26379
 const redisConnOpts = {
   sentinels: [
     { host: redisEnv.REDIS_SENTINEL_01, port: sentinelPort },
