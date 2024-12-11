@@ -10,6 +10,9 @@ import Router from '@koa/router'
 import { Albums } from '@mattduffy/albums/Albums' // eslint-disable-line import/no-unresolved
 import { Blogs } from '@mattduffy/blogs' // eslint-disable-line import/no-unresolved
 // import { Users } from '../models/users.js'
+import {
+  addIpToSession,
+} from './middlewares.js'
 import { _log, _error } from '../utils/logging.js'
 import { redis } from '../daos/impl/redis/redis-client.js'
 
@@ -32,7 +35,7 @@ async function hasFlash(ctx, next) {
   await next()
 }
 
-router.get('index', '/', hasFlash, async (ctx) => {
+router.get('index', '/', addIpToSession, hasFlash, async (ctx) => {
   const log = mainLog.extend('index')
   // const error = mainError.extend('index')
   log('inside main router: /')
@@ -48,7 +51,7 @@ router.get('index', '/', hasFlash, async (ctx) => {
   await ctx.render('index', locals)
 })
 
-router.get('galleries', '/galleries', hasFlash, async (ctx) => {
+router.get('galleries', '/galleries', addIpToSession, hasFlash, async (ctx) => {
   const log = mainLog.extend('galleries')
   const error = mainError.extend('galleries')
   log('inside index router: /galleries')
@@ -80,7 +83,7 @@ router.get('galleries', '/galleries', hasFlash, async (ctx) => {
   await ctx.render('albums/index', locals)
 })
 
-router.get('blogs', '/blog', hasFlash, async (ctx) => {
+router.get('blogs', '/blog', addIpToSession, hasFlash, async (ctx) => {
   const log = mainLog.extend('blogs')
   const error = mainError.extend('blogs')
   log('inside index router: /blogs')
@@ -112,7 +115,7 @@ router.get('blogs', '/blog', hasFlash, async (ctx) => {
   await ctx.render('blog/index', locals)
 })
 
-router.get('about', '/about', hasFlash, async (ctx) => {
+router.get('about', '/about', addIpToSession, hasFlash, async (ctx) => {
   const log = mainLog.extend('about')
   // const error = mainError.extend('about')
   log('inside index router: /about')
@@ -125,7 +128,7 @@ router.get('about', '/about', hasFlash, async (ctx) => {
   })
 })
 
-router.get('contact', '/contact', hasFlash, async (ctx) => {
+router.get('contact', '/contact', addIpToSession, hasFlash, async (ctx) => {
   const log = mainLog.extend('contact')
   // const error = mainError.extend('contact')
   log('inside index router: /contact')
