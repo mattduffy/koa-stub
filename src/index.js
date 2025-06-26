@@ -56,7 +56,7 @@ let _local = `local: http://${appEnv.HOST}:${appEnv.PORT}`
 let _public = `public: https://${appEnv.DOMAIN_NAME}`
 let _nodejs = `process: ${process.release.name} ${process.version} (${process.release.lts})`
 let _arch = `arch: ${process.arch} ${process.platform}`
-const longestlabel = [_startingup, _local, _public].reduce((a, c) => {
+const longestlabel = [_startingup, _local, _public, _nodejs, _arch].reduce((a, c) => {
   if (a > (c.indexOf(':') + 1)) {
     return a
   }
