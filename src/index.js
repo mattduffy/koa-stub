@@ -13,6 +13,7 @@ import Keygrip from 'keygrip'
 import render from '@koa/ejs'
 import * as dotenv from 'dotenv'
 import { migrations } from '@mattduffy/koa-migrations'
+import { Banner } from '@mattduffy/banner'
 import { _log, _error } from './utils/logging.js'
 import { geoIPCity } from './utils/geoip.js'
 import * as mongoClient from './daos/impl/mongodb/mongo-client.js'
@@ -47,52 +48,19 @@ const __dirname = path.dirname(__filename)
 const appRoot = path.resolve(`${__dirname}/..`)
 const appEnv = {}
 const showDebug = process.env.NODE_ENV !== 'production'
-dotenv.config({ path: path.resolve(appRoot, 'config/app.env'), processEnv: appEnv, debug: showDebug })
-// dotenv.config({ path: path.resolve(appRoot, 'config/test.env'), debug: showDebug })
+dotenv.config({
+  path: path.resolve(appRoot, 'config/app.env'),
+  processEnv: appEnv,
+  debug: showDebug,
+})
 
-const horizontalborder = '*'
-let _startingup = `Starting up: ${appEnv.SITE_NAME}`
-let _local = `local: http://${appEnv.HOST}:${appEnv.PORT}`
-let _public = `public: https://${appEnv.DOMAIN_NAME}`
-let _nodejs = `process: ${process.release.name} ${process.version} (${process.release.lts})`
-let _arch = `arch: ${process.arch} ${process.platform}`
-const longestlabel = [_startingup, _local, _public, _nodejs, _arch].reduce((a, c) => {
-  if (a > (c.indexOf(':') + 1)) {
-    return a
-  }
-  return (c.indexOf(':') + 1)
-}, '')
-
-_startingup = _startingup.padStart(
-  (longestlabel - _startingup.indexOf(':'))
-  + _startingup.length, ' ')
-_local = _local.padStart(
-  (longestlabel - _local.indexOf(':'))
-  + _local.length, ' ')
-_public = _public.padStart(
-  (longestlabel - _public.indexOf(':'))
-  + _public.length, ' ')
-_nodejs = _nodejs.padStart(
-  (longestlabel - _nodejs.indexOf(':'))
-  + _nodejs.length, ' ')
-_arch = _arch.padStart(
-  (longestlabel - _arch.indexOf(':'))
-  + _arch.length, ' ')
-const longestline = [_startingup, _local, _public].reduce((a, c) => {
-  if (a > c.length) {
-    return a
-  }
-  return c.length
-}, '')
-console.info(`*${horizontalborder.padEnd(longestline + 5, '*')}*`)
-console.info(`*  ${' '.padEnd(longestline + 2, ' ')} *`)
-console.info(`* ${_startingup}${' '.padEnd((longestline - _startingup.length) + 3, ' ')} *`)
-console.info(`* ${_local}${' '.padEnd((longestline - _local.length) + 3, ' ')} *`)
-console.info(`* ${_public}${' '.padEnd((longestline - _public.length) + 3, ' ')} *`)
-console.info(`* ${_nodejs}${' '.padEnd((longestline - _nodejs.length) + 3, ' ')} *`)
-console.info(`* ${_arch}${' '.padEnd((longestline - _arch.length) + 3, ' ')} *`)
-console.info(`*  ${' '.padEnd(longestline + 2, ' ')} *`)
-console.info(`*${horizontalborder.padEnd(longestline + 5, '*')}*`)
+const banner = new Banner({
+  name: appEnv.SITE_NAME,
+  local: appEnv.HOST,
+  localPort: appEnv.PORT,
+  public: appEnv.DOMAIN_NAME,
+})
+banner.print()
 
 const key1 = appEnv.KEY1
 const key2 = appEnv.KEY2

@@ -41,6 +41,7 @@
     "@mattduffy/unpacker": "file:./../unpacker",
     "@mattduffy/users": "file:./../users",
     "@mattduffy/webfinger": "file:./../webfinger",
+    "@mattduffy/banner": "file:./../banner",
     "@maxmind/geoip2-node": "5.0.0",
     "commander": "11.0.0",
     "debug": "4.3.4",
