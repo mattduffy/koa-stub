@@ -70,11 +70,13 @@ router.get('galleries', '/galleries', addIpToSession, hasFlash, async (ctx) => {
     error(e)
   }
   log('users with public albums: ', publicAlbums)
+  log('************************** ctx.request inside /galleries handler', ctx)
   const locals = {
     recent10,
     publicAlbums,
     body: ctx.body,
-    origin: ctx.request.origin,
+    // origin: ctx.state.origin,
+    // set in viewGlobals() and ejs mergers locals with ctx.state.{}
     flash: ctx.flash?.galleries ?? {},
     title: `${ctx.app.site}: Galleries`,
     sessionUser: ctx.state.sessionUser,
@@ -106,7 +108,6 @@ router.get('blogs', '/blog', addIpToSession, hasFlash, async (ctx) => {
     recent10,
     publicBlogs,
     body: ctx.body,
-    origin: ctx.request.origin,
     flash: ctx.flash?.blogs ?? {},
     title: `${ctx.app.site}: Blogs`,
     sessionUser: ctx.state.sessionUser,

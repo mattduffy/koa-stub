@@ -1554,7 +1554,12 @@ router.get('adminListUsers', '/admin/account/listusers', hasFlash, async (ctx) =
       })
     } catch (e) {
       error('Error trying to retrieve list of all user accounts.')
-      ctx.throw('Error trying to retrieve list of all user accounts.')
+      // ctx.throw('Error trying to retrieve list of all user accounts.')
+      const err = new Error(
+        'Error trying to retrieve list of all user accounts.',
+        { cause: e }
+      )
+      ctx.throw(500, err)
     }
     await ctx.render('account/admin-listusers', locals)
   }
@@ -1607,7 +1612,11 @@ router.get('adminViewUser', '/admin/account/view/:username', hasFlash, async (ct
     } catch (e) {
       error(`Error trying to retrieve ${ctx.params.username}'s account.`)
       error(e)
-      ctx.throw(500, `Error trying to retrieve ${ctx.params.username}'s account.`)
+      const err = new Error(
+        `Error trying to retrieve ${ctx.params.username}'s account.`,
+        { cause: e },
+      )
+      ctx.throw(500, err)
     }
     await ctx.render('account/admin-user-details-view', locals)
   }
@@ -1652,7 +1661,12 @@ router.get('adminEditUserGet', '/admin/account/edit/:username', hasFlash, async 
     } catch (e) {
       error(`Error trying to retrieve ${ctx.params.username}'s account.`)
       error(e)
-      ctx.throw(500, `Error trying to retrieve ${ctx.params.username}'s account.`)
+      // ctx.throw(500, `Error trying to retrieve ${ctx.params.username}'s account.`)
+      const err = new Error(
+        `Error trying to retrieve ${ctx.params.username}'s account.`,
+        { cause: e }
+      )
+      ctx.throw(500, err)
     }
     await ctx.render('account/admin-user-details-edit', locals)
   }
@@ -1786,7 +1800,9 @@ router.post('adminEditUserPost', '/admin/account/edit', hasFlash, processFormDat
           }
         } catch (e) {
           error(e)
-          // ctx.throw(400, 'Failed to update user account.', e)
+          // ctx.throw(400, e, 'Failed to update user account.')
+          // const err = new Error('Failed to update user account.', { cause: e })
+          // ctx.throw(400, err)
           ctx.flash = {
             view: {
               info: null,
@@ -1802,7 +1818,9 @@ router.post('adminEditUserPost', '/admin/account/edit', hasFlash, processFormDat
       }
     } catch (e) {
       error(e)
-      ctx.throw(500, 'Failed up update user\'s account.', e)
+      // ctx.throw(500, 'Failed up update user\'s account.', e)
+      const err = new Error('Failed up update user\'s account.', { cause: e })
+      ctx.throw(500, err)
     }
   }
 })

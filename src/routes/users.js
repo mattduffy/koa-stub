@@ -97,7 +97,9 @@ router.get('getUserById', '/user/byId/:id', async (ctx) => {
   const id = sanitize(ctx.params.id)
   log(`looking up user by Id: ${id}`)
   if (Buffer.from(id).length !== 24 || /[^0-9A-Fa-f]/.test(id)) {
-    ctx.throw(400, `Not a valid user ID: ${id}`)
+    // ctx.throw(400, `Not a valid user ID: ${id}`)
+    const err = new Error(`Not a valid user ID: ${id}`)
+    ctx.throw(400, err)
   }
   ctx.state.sessionUser = { id }
   const db = ctx.state.mongodb.client.db()
@@ -107,7 +109,9 @@ router.get('getUserById', '/user/byId/:id', async (ctx) => {
   const foundUser = await users.getById(id, { archived: false })
   if (foundUser === null) {
     error(`No user found with ID: ${id}`)
-    ctx.throw(404, `No user found with ID: ${id}`)
+    // ctx.throw(404, `No user found with ID: ${id}`)
+    const err = new Error(`No user found with ID: ${id}`)
+    ctx.throw(404, err)
   }
   ctx.status = 200
   ctx.state.sessionUser = foundUser
@@ -120,9 +124,12 @@ router.get('getUserByEmail', '/user/byEmail/:email', async (ctx) => {
   const error = userError.extend('GET-user_byEmail')
   const email = sanitize(ctx.params.email)
   log(`looking up user by email: ${email}`)
-  if (/^[\w!#$%&'*+/=?`{|}~^-]+(?:\.[\w!#$%&'*+/=?`{|}~^-]+)*@(?:[A-Z0-9-]+\.)+[A-Z]{2,6}$/i.test(email)) {
+  if (/^[\w!#$%&'*+/=?`{|}~^-]+(?:\.[\w!#$%&'*+/=?`{|}~^-]+)*@(?:[A-Z0-9-]+\.)+[A-Z]{2,6}$/i
+    .test(email)) {
     error(`Not a valid email address: ${email}`)
-    ctx.throw(400, `Not a valid email address: ${email}`)
+    // ctx.throw(400, `Not a valid email address: ${email}`)
+    const err = new Error(`Not a valid email address: ${email}`)
+    ctx.throw(400, err)
   }
   ctx.state.sessionUser = { email }
   const db = ctx.state.mongodb.client.db()
@@ -132,7 +139,9 @@ router.get('getUserByEmail', '/user/byEmail/:email', async (ctx) => {
   const foundUser = await users.getByEmail(email, { archived: false })
   if (foundUser === null) {
     error(`No user found with email: ${email}`)
-    ctx.throw(404, `No user found with email: ${email}`)
+    // ctx.throw(404, `No user found with email: ${email}`)
+    const err = new Error(`No user found with email: ${email}`)
+    ctx.throw(404, err)
   }
   ctx.status = 200
   ctx.state.sessionUser = foundUser

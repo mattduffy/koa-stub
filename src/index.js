@@ -192,27 +192,29 @@ async function csp(ctx, next) {
     + 'frame-ancestors \'none\'; '
     + 'object-src \'none\'; '
     + 'form-action \'self\'; '
-    + `style-src 'self' ${ctx.request.origin} 'unsafe-inline' 'nonce-${nonce}'; `
-    + `style-src-attr 'self' ${ctx.request.origin} 'unsafe-inline'; `
-    + `style-src-elem 'self' ${ctx.request.origin} 'unsafe-inline'; `
-    + `script-src 'self' ${ctx.request.origin} 'nonce-${nonce}'; `
-    + `script-src-attr 'self' ${ctx.request.origin} 'nonce-${nonce}'; `
-    + `script-src-elem 'self' ${ctx.request.origin} 'nonce-${nonce}'; `
-    + `img-src 'self' data: blob: ${ctx.request.origin}; `
-    + `font-src 'self' ${ctx.request.origin}; `
-    + `media-src 'self' data: ${ctx.request.origin}; `
+    + `style-src 'self' ${ctx.request.protocol}://${ctx.app.domain} 'unsafe-inline' 'nonce-${nonce}'; `
+    + `style-src-attr 'self' ${ctx.request.protocol}://${ctx.app.domain} 'unsafe-inline'; `
+    + `style-src-elem 'self' ${ctx.request.protocol}://${ctx.app.domain} 'unsafe-inline'; `
+    + `script-src 'unsafe-inline' 'self' ${ctx.request.protocol}://${ctx.app.domain} 'nonce-${nonce}'; `
+    + `script-src-attr 'self' ${ctx.request.protocol}://${ctx.app.domain} 'nonce-${nonce}'; `
+    + `script-src-elem 'self' ${ctx.request.protocol}://${ctx.app.domain} 'nonce-${nonce}'; `
+    + `img-src 'self' data: blob: ${ctx.request.protocol}://${ctx.app.domain}; `
+    + `font-src 'self' ${ctx.request.protocol}://${ctx.app.domain}; `
+    + `media-src 'self' data: ${ctx.request.protocol}://${ctx.app.domain}; `
     + 'frame-src \'self\'; '
-    + `child-src 'self' blob: ${ctx.request.origin}; `
-    + `worker-src 'self' blob: ${ctx.request.origin}; `
-    + `manifest-src 'self' blob: ${ctx.request.origin}; `
-    + `connect-src 'self' blob: ${ctx.request.origin} ${ctx.request.origin.replace('https', 'wss')}; `
+    + `child-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
+    + `worker-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
+    + `manifest-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
+    + `connect-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain} wss://${ctx.app.domain})}; `
   ctx.set('Content-Security-Policy', policy)
   logg(`Content-Security-Policy: ${policy}`)
   try {
     await next()
   } catch (e) {
     err(e)
-    ctx.throw(500, 'Rethrown in CSP middleware', e)
+    // ctx.throw(500, 'Rethrown in CSP middleware', e)
+    const err = new Error('Rethrown in CSP middleware', { cause: e })
+    ctx.throw(500, err)
   }
 }
 

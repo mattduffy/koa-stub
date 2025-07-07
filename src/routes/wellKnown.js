@@ -49,7 +49,9 @@ router.get('jwks-json', '/.well-known/jwks.json', async (ctx) => {
     log(keys)
   } catch (e) {
     error(e)
-    ctx.throw(500, e)
+    // ctx.throw(500, e)
+    const err = new Error('', { cause: e })
+    ctx.throw(500, err)
   }
   let jwks
   try {
@@ -57,7 +59,9 @@ router.get('jwks-json', '/.well-known/jwks.json', async (ctx) => {
     log(jwks)
   } catch (e) {
     error(e)
-    ctx.throw(500, e)
+    // ctx.throw(500, e)
+    const err = new Error('', { cause: e })
+    ctx.throw(500, err)
   }
   ctx.status = 200
   ctx.type = 'application/json; charset=utf-8'
@@ -72,7 +76,9 @@ router.get('nodeinfo', '/.well-known/nodeinfo', async (ctx) => {
     error('Missing database connection')
     ctx.status = 500
     ctx.type = 'text/plain; charset=utf-8'
-    ctx.throw(500, 'Missing db connection')
+    // ctx.throw(500, 'Missing db connection')
+    const err = new Error('Missing db connection')
+    ctx.throw(500, err)
   }
   let info
   try {
@@ -92,7 +98,9 @@ router.get('nodeinfo', '/.well-known/nodeinfo', async (ctx) => {
   } catch (e) {
     error(e)
     ctx.status = 500
-    ctx.throw(500, 'Nodeinfo failure - 100', e)
+    // ctx.throw(500, 'Nodeinfo failure - 100', e)
+    const err = new Error('Nodeinfo failure - 100', { cause: e })
+    ctx.throw(500, err)
   }
 })
 
@@ -108,7 +116,9 @@ router.get('nodeinfo2.1', '/nodeinfo/2.1', async (ctx) => {
     log(info)
   } catch (e) {
     error(e)
-    ctx.throw(500, e)
+    // ctx.throw(500, e)
+    const err = new Error('', { cause: e })
+    ctx.throw(500, err)
   }
   if (!info) {
     error('Nodeinfo not found')
@@ -132,7 +142,9 @@ router.get('host-meta', '/.well-known/host-meta', async (ctx, next) => {
     await next()
   } catch (e) {
     error('Hostmeta failure - 200')
-    ctx.throw(500, 'Hostmeta failure - 200', e)
+    // ctx.throw(500, 'Hostmeta failure - 200', e)
+    const err = new Error('Hostmeta failure - 200', { cause: e })
+    ctx.throw(500, err)
   }
   let info
   try {
@@ -154,8 +166,9 @@ router.get('host-meta', '/.well-known/host-meta', async (ctx, next) => {
   } catch (e) {
     error(e)
     ctx.status = 500
-    // throw new Error(e)
-    ctx.throw(500, 'Hostmeta failure - 100', e)
+    // ctx.throw(500, 'Hostmeta failure - 100', e)
+    const err = new Error('Hostmeta failure - 100', { cause: e })
+    ctx.throw(500, err)
   }
 })
 
@@ -166,7 +179,9 @@ router.get('webfinger', '/.well-known/webfinger', async (ctx, next) => {
     error('Missing db connection')
     ctx.status = 500
     ctx.type = 'text/plain; charset=utf-8'
-    ctx.throw(500, 'Missing database connection.')
+    // ctx.throw(500, 'Missing database connection.')
+    const err = new Error('Missing database connection.')
+    ctx.throw(500, err)
   }
   try {
     const re = /^acct:([^\\s][A-Za-z0-9_-]{2,30})(?:@)?([^\\s].*)?$/
@@ -211,8 +226,9 @@ router.get('webfinger', '/.well-known/webfinger', async (ctx, next) => {
   } catch (e) {
     error(e)
     ctx.status = 500
-    // throw new Error(e)
-    ctx.throw(500, 'Webfinger failure - 100', e)
+    // ctx.throw(500, 'Webfinger failure - 100', e)
+    const err = new Error('Webfinger failure - 100', { cause: e })
+    ctx.throw(500, err)
   }
   return next()
   // try {
