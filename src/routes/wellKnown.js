@@ -25,7 +25,7 @@ router.get('security', '/.well-known/security.txt', async (ctx) => {
   securityTxt.push('Expires: 2025-12-31T23:59:00.000Z')
   securityTxt.push(`Encryption: ${ctx.app.securityGpg}`)
   securityTxt.push('Preferred-Languages: en')
-  securityTxt.push(`Canonical: ${ctx.origin}/.well-known/security.txt`)
+  securityTxt.push(`Canonical: ${ctx.state.origin}/.well-known/security.txt`)
   info(securityTxt)
   ctx.status = 200
   ctx.type = 'text/plain; charset=utf-8'
@@ -40,6 +40,7 @@ router.get('jwks-json', '/.well-known/jwks.json', async (ctx) => {
     db: ctx.state.mongodb.client.db(ctx.state.mongodb.client.dbName),
     keyDir: ctx.app.dirs.keys,
     siteName: ctx.app.site,
+    appEnv: ctx.app.appEnv,
   }
   const theApp = new App(o)
   // const theApp = new App({ db: ctx.state.mongodb.client, keyDir: ctx.app.dirs.keys })
@@ -82,7 +83,7 @@ router.get('nodeinfo', '/.well-known/nodeinfo', async (ctx) => {
   }
   let info
   try {
-    const host = ctx.origin
+    const host = ctx.request.host
     const o = { db: ctx.state.mongodb.client, host, path: ctx.request.path }
     const node = new NodeInfo(o)
     info = await node.info()
@@ -150,7 +151,7 @@ router.get('host-meta', '/.well-known/host-meta', async (ctx, next) => {
   try {
     // const host = `${ctx.request.protocol}://${ctx.request.host}`
     // const host = ctx.request.origin
-    const host = ctx.state.origin
+    const host = ctx.request.host
     const o = { path: ctx.request.path, host }
     const meta = new Hostmeta(o)
     info = meta.info()
@@ -196,7 +197,8 @@ router.get('webfinger', '/.well-known/webfinger', async (ctx, next) => {
         + 'resource=<query-uri>'
       ctx.body = 'Bad request - missing required URL parameter: resource'
     } else {
-      const { origin, host, protocol } = ctx.request
+      const { host, protocol } = ctx.request
+      const { origin } = ctx.state
       const localAcct = new RegExp(`(${host})`)
       let isLocal = false
       if (username[2] === undefined || localAcct.test(username[2])) {

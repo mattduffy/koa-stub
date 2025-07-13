@@ -32,7 +32,9 @@ router.get('appKeys', '/admin/app/keys', async (ctx) => {
       db: ctx.state.mongodb.client.db(ctx.state.mongodb.client.dbName),
       keyDir: ctx.app.dirs.keys,
       siteName: ctx.app.site,
+      appEnv: ctx.app.appEnv,
     }
+    log('app options', o)
     const theApp = new App(o)
     // const theApp = new App({ db: ctx.state.mongodb.client, keyDir: ctx.app.dirs.keys })
     const keys = await theApp.keys()
@@ -45,7 +47,7 @@ router.get('appKeys', '/admin/app/keys', async (ctx) => {
       theApp,
       csrfToken,
       nonce: ctx.app.nonce,
-      origin: ctx.request.origin,
+      // origin: ctx.request.origin,
       flash: ctx.flash.view ?? {},
       title: `${ctx.app.site}: App keys`,
       isAuthenticated: ctx.state.isAuthenticated,
