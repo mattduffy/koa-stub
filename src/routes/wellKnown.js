@@ -149,7 +149,8 @@ router.get('host-meta', '/.well-known/host-meta', async (ctx, next) => {
   let info
   try {
     // const host = `${ctx.request.protocol}://${ctx.request.host}`
-    const host = ctx.request.origin
+    // const host = ctx.request.origin
+    const host = ctx.state.origin
     const o = { path: ctx.request.path, host }
     const meta = new Hostmeta(o)
     info = meta.info()
@@ -191,7 +192,8 @@ router.get('webfinger', '/.well-known/webfinger', async (ctx, next) => {
       error('Missing resource query parameter.')
       ctx.status = 400
       ctx.type = 'text/plain; charset=utf-8'
-      ctx.response.message = 'Bad request - missing required webfinger URL parameter: resource=<query-uri>'
+      ctx.response.message = 'Bad request - missing required webfinger URL parameter: '
+        + 'resource=<query-uri>'
       ctx.body = 'Bad request - missing required URL parameter: resource'
     } else {
       const { origin, host, protocol } = ctx.request
