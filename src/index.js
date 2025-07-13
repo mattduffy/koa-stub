@@ -205,7 +205,7 @@ async function csp(ctx, next) {
     + `child-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
     + `worker-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
     + `manifest-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
-    + `connect-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain} wss://${ctx.app.domain})}; `
+    + `connect-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain} wss://${ctx.app.domain}; `
   ctx.set('Content-Security-Policy', policy)
   logg(`Content-Security-Policy: ${policy}`)
   try {
