@@ -225,7 +225,7 @@ router.get(
         body = {
           status: 'success',
           // url: `${ctx.request.origin}/${user.url}/jwks.json`,
-          url: `${ctx.origin}/${user.url}/jwks.json`,
+          url: `${ctx.state.origin}/${user.url}/jwks.json`,
           keys: await user.publicKeys(0, 'jwk'),
         }
       } else {
@@ -1379,9 +1379,9 @@ router.get('accountView', '/account/view', hasFlash, async (ctx) => {
       csrfToken: ulid(),
       isAuthenticated: ctx.state.isAuthenticated,
       // defaultAvatar: `${ctx.request.origin}/i/accounts/avatars/missing.png`,
-      defaultAvatar: `${ctx.origin}/i/accounts/avatars/missing.png`,
+      defaultAvatar: '/i/accounts/avatars/missing.png',
       // defaultHeader: `${ctx.request.origin}/i/accounts/headers/generic.png`,
-      defaultHeader: `${ctx.origin}/i/accounts/headers/generic.png`,
+      defaultHeader: '/i/accounts/headers/generic.png',
       title: `${ctx.app.site}: View Account Details`,
     }
     ctx.status = 200
@@ -1691,9 +1691,10 @@ router.get('adminViewUser', '/admin/account/view/:username', hasFlash, async (ct
       locals.jwtAccess = (ctx.state.sessionUser.jwts).token
       locals.title = `${ctx.app.site}: View ${ctx.params.username}`
       // locals.defaultAvatar = `${ctx.request.origin}/i/missing.png`
-      locals.defaultAvatar = `${ctx.origin}/i/missing.png`
+      locals.defaultAvatar = '/i/missing.png'
       // locals.defaultHeader = `${ctx.request.origin}/i/missing.png`
-      locals.defaultHeader = `${ctx.origin}/i/missing.png`
+      // locals.defaultHeader = `${ctx.origin}/i/missing.png`
+      locals.defaultHeader = 'i/missing.png'
     } catch (e) {
       error(`Error trying to retrieve ${ctx.params.username}'s account.`)
       error(e)
