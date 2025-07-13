@@ -170,7 +170,7 @@ async function openGraph(ctx, next) {
   ogArray.push('<meta property="og:site_name" content="Matt Made These">')
   ogArray.push('<meta property="og:title" content="Matt Made These.">')
   ogArray.push(`<meta property="og:url" content="${ctx.request.href}${ctx.request.search}">`)
-  ogArray.push(`<meta property="og:image" content="${ctx.request.origin}/i/plane-450x295.jpg">`)
+  ogArray.push(`<meta property="og:image" content="${ctx.state.origin}/i/plane-450x295.jpg">`)
   ogArray.push('<meta property="og:image:type" content="image/jpg">')
   ogArray.push('<meta property="og:image:width" content="450">')
   ogArray.push('<meta property="og:image:height" content="295">')
@@ -227,7 +227,8 @@ async function cors(ctx, next) {
     ctx.set('Access-Control-Allow-Origin', '*')
     ctx.set('Access-Control-Allow-Methods', 'GET')
   } else {
-    ctx.set('Access-Control-Allow-Origin', ctx.request.origin)
+    // ctx.set('Access-Control-Allow-Origin', ctx.request.origin)
+    ctx.set('Access-Control-Allow-Origin', ctx.state.origin)
     ctx.set('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS')
   }
   ctx.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
@@ -263,11 +264,12 @@ async function viewGlobals(ctx, next) {
     ctx.state.origin = `${ctx.request.protocol}://${ctx.host}`
     ctx.state.domain = `${ctx.request.protocol}://${ctx.host}`
   } else {
-    ctx.state.origin = `${ctx.request.protocol}://${ctx.app.domain}`
+    // ctx.state.origin = `${ctx.request.protocol}://${ctx.app.domain}`
+    ctx.state.origin = `${ctx.request.protocol}://${ctx.request.host}`
     ctx.state.domain = `${ctx.request.protocol}://${ctx.app.domain}`
   }
-  logg(ctx.state.origin)
-  logg(ctx.state.domain)
+  logg('ctx.state.origin', ctx.state.origin)
+  logg('ctx.state.domain', ctx.state.domain)
   ctx.state.nonce = crypto.randomBytes(16).toString('base64')
   ctx.state.siteName = ctx.app.site
   ctx.state.appName = ctx.app.site.toProperCase()
@@ -344,7 +346,7 @@ async function logRequest(ctx, next) {
     }
     logg(`Request href:        ${ctx.request.href}`)
     logg(`Request url:         ${ctx.request.url}`)
-    // logg(`Request originalUrl: ${ctx.request.originalUrl}`)
+    logg(`Request originalUrl: ${ctx.request.originalUrl}`)
     logg(`Request remote ips:  ${ctx.request.ips}`)
     logg('Request headers:     %O', ctx.request.headers)
     await next()
