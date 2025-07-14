@@ -158,7 +158,7 @@ async function proxyCheck(ctx, next) {
     await next()
   } catch (e) {
     err(e)
-    ctx.throw(500, 'Rethrown in CSP middleware', e)
+    ctx.throw(500, 'Rethrown in proxyCheck middleware', e)
   }
 }
 
@@ -290,7 +290,7 @@ async function logRequest(ctx, next) {
   const err = error.extend('logRequest')
   try {
     /* eslint-disable-next-line */
-    const ignore = ['favicon', 'c/.+\.css']
+    const ignore = ['favicon', 'c/.+\.css', 'j/*.js']
     /* eslint-disable-next-line */
     function find(x) {
       const re = new RegExp(x)
@@ -300,11 +300,12 @@ async function logRequest(ctx, next) {
       const db = ctx.state.mongodb.client.db(ctx.state.mongodb.client.dbName)
       const mainLog = db.collection('mainLog')
       const logEntry = {}
-      logEntry.remoteIps = ctx.request.ips
+      // logEntry.remoteIps = ctx.request.ips
       const geos = []
       if (geoIPCity && ctx.request.ips) {
         try {
           if (Array.isArray(ctx.request.ips)) {
+            logEntry.remoteIps = ctx.request.ips
             ctx.request.ips.forEach((ip, i) => {
               const city = geoIPCity.city(ip)
               const geo = {}
@@ -319,6 +320,7 @@ async function logRequest(ctx, next) {
               logg('Request ip geo:     %O', geo)
             })
           } else {
+            logEntry.remoteIps = ctx.request.ips
             const city = geoIPCity.city(ctx.request.ip)
             const geo = {}
             geo.ip = ctx.request.ip
@@ -334,6 +336,8 @@ async function logRequest(ctx, next) {
         } catch (e) {
           err(e.message)
         }
+      } else {
+        logg(`failed to log ip geo for ${ctx.request.ips}`)
       }
       logEntry.date = new Date()
       logEntry.method = ctx.method
@@ -345,10 +349,10 @@ async function logRequest(ctx, next) {
       await mainLog.insertOne(logEntry)
     }
     logg(`Request href:        ${ctx.request.href}`)
-    logg(`Request url:         ${ctx.request.url}`)
-    logg(`Request originalUrl: ${ctx.request.originalUrl}`)
     logg(`Request remote ips:  ${ctx.request.ips}`)
+    logg(`Request remote ip:   ${ctx.request.ip}`)
     logg('Request headers:     %O', ctx.request.headers)
+    logg('Request querystring: %O', ctx.request.query)
     await next()
   } catch (e) {
     err(e)
@@ -363,16 +367,20 @@ app.use(openGraph)
 app.use(errors)
 app.use(httpMethodOverride())
 app.use(getSessionUser)
+//
 app.use(flashMessage({}, app))
 app.use(prepareRequest())
 app.use(tokenAuthMiddleware())
 app.use(checkServerJWKs)
 app.use(proxyCheck)
+// app.use(permissions)
 app.use(csp)
 app.use(cors)
+// app.use(acceptCH)
 app.use(serve(app.dirs.public.dir))
 app.use(theApp.routes())
 app.use(Auth.routes())
+// app.use(Mapkit.routes())
 app.use(Account.routes())
 app.use(Users.routes())
 app.use(Main.routes())
@@ -382,6 +390,21 @@ app.use(wellKnown.routes())
 app.use(Seo.routes())
 app.use(activityV1.routes())
 app.use(apiV1.routes())
+
+app.on('session:missed', async (e) => {
+  console.log('koa-session emitted a missed event')
+  console.log(e)
+})
+
+app.on('session:invalid', async (e) => {
+  console.log('koa-session emitted a invalid event')
+  console.log(e)
+})
+
+app.on('session:expired', async (e) => {
+  console.log('koa-session emitted a expired event')
+  console.log(e)
+})
 
 app.on('error', async (err, ctx) => {
   error('***********************************')
