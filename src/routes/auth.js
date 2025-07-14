@@ -8,9 +8,14 @@
 import Router from '@koa/router'
 import { ulid } from 'ulid'
 // import { ObjectId } from 'mongodb'
+import {
+  // addIpToSession,
+  doTokensMatch,
+  processFormData,
+  hasFlash,
+} from './middlewares.js'
 import { _log, _error } from '../utils/logging.js'
 import { Users } from '../models/users.js'
-import { doTokensMatch, processFormData, hasFlash } from './middlewares.js'
 
 const authLog = _log.extend('auth')
 const authError = _error.extend('auth')
@@ -50,11 +55,16 @@ router.get('getLogin', '/login', async (ctx, next) => {
 router.post('postLogin', '/login', hasFlash, processFormData, async (ctx) => {
   const log = authLog.extend('POST-login')
   const error = authError.extend('POST-login')
-  log(ctx.request.body)
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
   const sessionId = ctx.cookies.get('session')
   const [username] = ctx.request.body.username
   const [password] = ctx.request.body.password
-  if (doTokensMatch(ctx)) {
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+    ctx.status = 401
+    ctx.body = { error: 'csrf token mismatch' }
+  } else {
     const db = ctx.state.mongodb.client.db()
     const collection = db.collection('users')
     const users = new Users(collection, ctx)
@@ -99,7 +109,6 @@ router.post('postLogin', '/login', hasFlash, processFormData, async (ctx) => {
           error: null,
         },
       }
-      // ctx.redirect('/')
       ctx.redirect('/account')
     }
   }
