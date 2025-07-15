@@ -9,7 +9,7 @@ import Router from '@koa/router'
 import { ulid } from 'ulid'
 // import { ObjectId } from 'mongodb'
 import {
-  // addIpToSession,
+  addIpToSession,
   doTokensMatch,
   processFormData,
   hasFlash,
@@ -20,6 +20,13 @@ import { Users } from '../models/users.js'
 const authLog = _log.extend('auth')
 const authError = _error.extend('auth')
 const router = new Router()
+
+//
+// Middleware functions located in ./middlewares.js file:
+// - doTokensMatch()
+// - processFormData()
+// - hasFlash()
+//
 
 router.get('getLogin', '/login', async (ctx, next) => {
   const log = authLog.extend('GET-login')
@@ -52,7 +59,7 @@ router.get('getLogin', '/login', async (ctx, next) => {
   await ctx.render('login', locals)
 })
 
-router.post('postLogin', '/login', hasFlash, processFormData, async (ctx) => {
+router.post('postLogin', '/login', hasFlash, addIpToSession, processFormData, async (ctx) => {
   const log = authLog.extend('POST-login')
   const error = authError.extend('POST-login')
   const csrfTokenCookie = ctx.cookies.get('csrfToken')
