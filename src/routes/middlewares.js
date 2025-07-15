@@ -27,29 +27,29 @@ export function doTokensMatch(ctx) {
   const csrfTokenCookie = ctx.cookies.get('csrfToken')
   const csrfTokenSession = ctx.session.csrfToken
   let csrfTokenHidden
-  if (ctx.request.body?.['csrf-token']) {
-    [csrfTokenHidden] = ctx.request.body['csrf-token']
+  if (ctx.request?.body
+    && (ctx.request.body?.['csrf-token'] || ctx.request.body?.csrfTokenHidden)) {
+    if (ctx.request.body?.['csrf-token']) {
+      [csrfTokenHidden] = ctx.request.body['csrf-token']
+    }
+    if (ctx.request.body?.csrfTokenHidden) {
+      [csrfTokenHidden] = ctx.request.body.csrfTokenHidden
+    }
+  } else {
+    log('Not a form submission, so no csrfTokenHidden to evaluate')
+    csrfTokenHidden = null 
   }
-  if (ctx.request.body?.csrfTokenHidden) {
-    [csrfTokenHidden] = ctx.request.body.csrfTokenHidden
-  }
-  if (csrfTokenCookie === csrfTokenSession) {
-    log(`cookie  ${csrfTokenCookie} === session ${csrfTokenSession}`)
-  }
-  if (csrfTokenCookie === csrfTokenHidden) {
-    log(`cookie  ${csrfTokenCookie} === hidden ${csrfTokenHidden}`)
-  }
-  if (csrfTokenSession === csrfTokenHidden) {
-    log(`session ${csrfTokenSession} === hidden ${csrfTokenHidden}`)
-  }
-  if (!(csrfTokenCookie === csrfTokenSession && csrfTokenSession === csrfTokenHidden)) {
+  if (csrfTokenHidden !== null 
+    && (csrfTokenCookie !== csrfTokenSession
+    || csrfTokenSession !== csrfTokenHidden)) {
     error(`csrf token mismatch: header: ${csrfTokenCookie}`)
     error(`                     hidden: ${csrfTokenHidden}`)
     error(`                    session: ${csrfTokenSession}`)
-    ctx.status = 403
-    ctx.type = 'application/json; charset=utf-8'
-    ctx.body = { status: 'Error, csrf tokens do not match' }
+    return false
   }
+  log(`csrf tokens match: header: ${csrfTokenCookie}`)
+  log(`                   hidden: ${csrfTokenHidden}`)
+  log(`                  session: ${csrfTokenSession}`)
   return true
 }
 
