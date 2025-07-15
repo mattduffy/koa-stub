@@ -35,6 +35,7 @@ async function doDelete(dataset) {
   }
   const formData = new FormData()
   formData.append('csrfTokenForm', dataset.csrftoken)
+  formData.append('csrfTokenHidden', dataset.csrftoken)
   formData.append('id', dataset.id)
   const opts = {
     method: 'DELETE',
