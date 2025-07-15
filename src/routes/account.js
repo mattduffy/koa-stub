@@ -5,30 +5,30 @@
  * @file src/routes/account.js The router for the account api endpoints.
  */
 
+import Router from '@koa/router'
+import { ulid } from 'ulid'
+// import { ObjectId } from 'mongodb'
 import path from 'node:path'
 import {
   mkdir, rename, writeFile, stat,
 } from 'node:fs/promises'
-import Router from '@koa/router'
-import { ulid } from 'ulid'
-// import { ObjectId } from 'mongodb'
-// import formidable from 'formidable'
-/* eslint-disable */
+import {
+  // addIpToSession,
+  doTokensMatch,
+  processFormData,
+  hasFlash,
+} from './middlewares.js'
+import { _log, _error } from '../utils/logging.js'
+import { Users, AdminUser } from '../models/users.js'
 import { Blog, Blogs, slugify } from '@mattduffy/blogs'
 import { Album } from '@mattduffy/albums'
 import { Albums } from '@mattduffy/albums/Albums'
 import { Unpacker } from '@mattduffy/unpacker'
-/* eslint-enable */
-import { _log, _error } from '../utils/logging.js'
-/* eslint-disable-next-line no-unused-vars */
-import { Users, AdminUser } from '../models/users.js'
 import { redis } from '../daos/impl/redis/redis-client.js'
-import { doTokensMatch, processFormData, hasFlash } from './middlewares.js'
 
 const USERS = 'users'
 const accountLog = _log.extend('account')
 const accountError = _error.extend('account')
-
 const router = new Router()
 
 function isAsyncRequest(ctx) {
@@ -111,11 +111,17 @@ router.post(
     ctx.redirect('/')
   }
   log(`View ${ctx.state.sessionUser.username}'s account password.`)
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
+  const sessionId = ctx.cookies.get('session')
   const [currentPassword] = ctx.request.body.currentPassword ?? ''
   const [newPassword1] = ctx.request.body.newPassword1 ?? ''
   const [newPassword2] = ctx.request.body.newPassword2 ?? ''
-  if (doTokensMatch(ctx)) {
-    /* eslint-disable no-lonely-if */
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+    ctx.status = 401
+    ctx.body = { error: 'csrf token mismatch' }
+  } else {
     if (currentPassword === '') {
       error('currentPassword is missing.')
       ctx.flash = { edit: { error: 'Missing current password.' } }
@@ -142,7 +148,6 @@ router.post(
         ctx.redirect('/account/change/password')
       }
     }
-    /* eslint-enable no-lonely-if */
   }
 })
 
@@ -188,11 +193,12 @@ router.get(
     error('User is not authenticated.  Redirect to /')
     ctx.status = 401
     ctx.redirect('/')
-  } else if (ctx.request.header.csrftoken !== ctx.session.csrfToken) {
-    error(
-      `CSR-Token mismatch: header:${ctx.request.header.csrftoken} - `
-      + `session:${ctx.session.csrfToken}`
-    )
+  }
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
+  // if (ctx.request.header.csrftoken !== ctx.session.csrfToken) {
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
     status = 401
     ctx.body = { error: 'csrf token mismatch' }
   } else {
@@ -348,11 +354,13 @@ router.post('accountBlogEdit', '/account/blog/edit', hasFlash, processFormData, 
     error('User is not authenticated.  Redirect to /')
     ctx.status = 401
     ctx.redirect('/')
-  } else if (ctx.cookies.get('csrfToken') !== ctx.session.csrfToken) {
-    error(
-      `CSR-Token mismatch: header: ${ctx.cookies.get('csrfToken')} - `
-      + `session:${ctx.session.csrfToken}`
-    )
+  }
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
+  const sessionId = ctx.cookies.get('session')
+  // if (ctx.cookies.get('csrfToken') !== ctx.session.csrfToken) {
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header: ${csrfTokenCookie} - session:${csrfTokenSession}`)
     status = 401
     body = { error: 'csrf token mismatch' }
   } else {
@@ -369,85 +377,83 @@ router.post('accountBlogEdit', '/account/blog/edit', hasFlash, processFormData, 
     const blogKeywords = (ctx.request.body?.keywords)
       ? Array.from(ctx.request.body?.keywords?.[0]?.split(','))
       : []
-    if (doTokensMatch(ctx)) {
-      const blogDirPath = path.join(
-        ctx.app.dirs.public.dir,
-        ctx.state.sessionUser.publicDir,
-        'blog',
-      )
-      let blogDir
-      let smallImg
-      let smallImgPath
-      let bigImg
-      let bigImgPath
-      try {
-        log(blogDirPath)
-        blogDir = await mkdir(path.resolve(blogDirPath), { recursive: true })
-        if (blogDir !== false) {
-          log(`blogDir exists?: (${blogDir}) ${blogDirPath}`)
-        }
-        if (ctx.request?.files && ctx.request.files?.headerImageSmall) {
-          const originalNameSmall = ctx.request.files.headerImageSmall[0].originalFilename
-          smallImg = path.resolve(blogDirPath, originalNameSmall)
-          await rename(ctx.request.files.headerImageSmall[0].filepath, smallImg)
-          smallImgPath = `${ctx.state.sessionUser.publicDir}blog/${originalNameSmall}`
-        }
-        if (ctx.request?.files && ctx.request.files?.headerImageBig) {
-          const originalNameBig = ctx.request.files.headerImageBig[0].originalFilename
-          bigImg = path.resolve(blogDirPath, originalNameBig)
-          bigImgPath = `${ctx.state.sessionUser.publicDir}blog/${originalNameBig}`
-          await rename(ctx.request.files.headerImageBig[0].filepath, bigImg)
-        }
-      } catch (e) {
-        const msg = `Failed to create (or it doesn't exist) ${blogDirPath}`
-        error(msg)
-        error(e)
-        throw new Error(msg, { cause: e })
+    const blogDirPath = path.join(
+      ctx.app.dirs.public.dir,
+      ctx.state.sessionUser.publicDir,
+      'blog',
+    )
+    let blogDir
+    let smallImg
+    let smallImgPath
+    let bigImg
+    let bigImgPath
+    try {
+      log(blogDirPath)
+      blogDir = await mkdir(path.resolve(blogDirPath), { recursive: true })
+      if (blogDir !== false) {
+        log(`blogDir exists?: (${blogDir}) ${blogDirPath}`)
       }
-      try {
-        const db = ctx.state.mongodb.client.db()
-        const o = {
-          newBlog: (!blogId?.length),
-          blogOwnerId: ctx.state.sessionUser.id,
-          blogOwnerName: ctx.state.sessionUser.username,
-          blogId,
-          blogTitle,
-          blogDescription,
-          blogKeywords,
-          public: blogPublic,
-        }
+      if (ctx.request?.files && ctx.request.files?.headerImageSmall) {
+        const originalNameSmall = ctx.request.files.headerImageSmall[0].originalFilename
+        smallImg = path.resolve(blogDirPath, originalNameSmall)
+        await rename(ctx.request.files.headerImageSmall[0].filepath, smallImg)
+        smallImgPath = `${ctx.state.sessionUser.publicDir}blog/${originalNameSmall}`
+      }
+      if (ctx.request?.files && ctx.request.files?.headerImageBig) {
+        const originalNameBig = ctx.request.files.headerImageBig[0].originalFilename
+        bigImg = path.resolve(blogDirPath, originalNameBig)
+        bigImgPath = `${ctx.state.sessionUser.publicDir}blog/${originalNameBig}`
+        await rename(ctx.request.files.headerImageBig[0].filepath, bigImg)
+      }
+    } catch (e) {
+      const msg = `Failed to create (or it doesn't exist) ${blogDirPath}`
+      error(msg)
+      error(e)
+      throw new Error(msg, { cause: e })
+    }
+    try {
+      const db = ctx.state.mongodb.client.db()
+      const o = {
+        newBlog: (!blogId?.length),
+        blogOwnerId: ctx.state.sessionUser.id,
+        blogOwnerName: ctx.state.sessionUser.username,
+        blogId,
+        blogTitle,
+        blogDescription,
+        blogKeywords,
+        public: blogPublic,
+      }
+      if (smallImgPath) {
+        o.headerImageSmall = smallImgPath
+      }
+      if (bigImgPath) {
+        o.headerImageBig = bigImgPath
+      }
+      if (!blogId) {
+        blog = await Blogs.newBlog(db, o, redis)
+        blog.url = blogTitle
+      } else {
+        blog = await Blogs.getById(db, blogId, redis)
+        blog.public = blogPublic
+        blog.title = blogTitle
+        blog.url = blogTitle
+        blog.description = blogDescription
+        blog.keywords = blogKeywords
         if (smallImgPath) {
-          o.headerImageSmall = smallImgPath
+          blog.headerImageSmall = smallImgPath
         }
         if (bigImgPath) {
-          o.headerImageBig = bigImgPath
+          blog.headerImageBig = bigImgPath
         }
-        if (!blogId) {
-          blog = await Blogs.newBlog(db, o, redis)
-          blog.url = blogTitle
-        } else {
-          blog = await Blogs.getById(db, blogId, redis)
-          blog.public = blogPublic
-          blog.title = blogTitle
-          blog.url = blogTitle
-          blog.description = blogDescription
-          blog.keywords = blogKeywords
-          if (smallImgPath) {
-            blog.headerImageSmall = smallImgPath
-          }
-          if (bigImgPath) {
-            blog.headerImageBig = bigImgPath
-          }
-        }
-        const saved = await blog.save()
-        log(`blog slug: ${blog.url}`)
-        status = 200
-        body = { status: 'ok', saved, blog }
-      } catch (e) {
-        error(e)
-        status = 500
-        body = { msg: 'failed to update blog.' }
       }
+      const saved = await blog.save()
+      log(`blog slug: ${blog.url}`)
+      status = 200
+      body = { status: 'ok', saved, blog }
+    } catch (e) {
+      error(e)
+      status = 500
+      body = { msg: 'failed to update blog.' }
     }
   }
   ctx.status = status
@@ -469,12 +475,21 @@ router.get('accountListBlogPosts', '/account/blog/posts', hasFlash, async (ctx) 
     ctx.status = 401
     ctx.redirect('/')
   }
-  if (doTokensMatch(ctx)) {
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+    ctx.status = 401
+    ctx.body = { error: 'csrf token mismatch' }
+  } else {
     const csrfToken = ulid()
     ctx.session.csrfToken = csrfToken
     ctx.cookies.set('csrfToken', csrfToken, { httpOnly: true, sameSite: 'strict' })
     try {
       const db = ctx.state.mongodb.client.db()
+      //
+      // TODO: implement Blogs.getByCreator() method
+      //
       const blog = await Blogs.getByCreator(db, ctx.state.sessionUser.username, redis)
       const posts = await blog.getPosts()
       log(`blog slug: ${blog.url}`)
@@ -511,7 +526,12 @@ router.post(
   }
   let status
   let body
-  if (doTokensMatch(ctx)) {
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+    ctx.status = 401
+  } else {
     log(ctx.request.body)
     log(ctx.request.files)
     let blog
@@ -572,6 +592,14 @@ router.post(
         log(`album id? ${album.id}`)
         post.albumId = album.id
         log(`${post}`)
+        //
+        // @TODO: either make image optional and test for its presence,
+        // OR, enforce required image in browser and prevent form submission
+        // if no image is selected.
+        //
+        // @see https://github.com/mattduffy/koa-stub/issues/8 for additional
+        // problems.
+        //
         const originalFilenameCleaned = sanitizeFilename(smallImg.originalFilename)
         const newImageAlbumDirPath = path.join(album.albumDir, originalFilenameCleaned)
         log('uploaded filepath:                 ', smallImg.filepath)
@@ -778,7 +806,13 @@ router.delete(
   let album
   const albumId = ctx.params.id
   const image = ctx.request.body.image[0]
-  if (doTokensMatch(ctx)) {
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+    ctx.status = 401
+    ctx.body = { error: 'csrf token mismatch' }
+  } else {
     try {
       const db = ctx.state.mongodb.client.db()
       album = await Albums.getById(db, albumId, redis)
@@ -832,7 +866,13 @@ router.put(
     log('uploaded filepath:             ', image.filepath)
     log('uploaded originalFilename:     ', image.originalFilename)
     log('uploaded originalFilenamePath: ', originalFilenamePath)
-    if (doTokensMatch(ctx)) {
+    const csrfTokenCookie = ctx.cookies.get('csrfToken')
+    const csrfTokenSession = ctx.session.csrfToken
+    if (!doTokensMatch(ctx)) {
+      error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+      ctx.status = 401
+      ctx.body = { error: 'csrf token mismatch' }
+    } else {
       let albumDir
       let newImageAlbumDirPath
       try {
@@ -900,13 +940,13 @@ router.post(
     error('User is not authenticated.  Redirect to /')
     ctx.status = 401
     ctx.redirect('/')
-  } else if (ctx.cookies.get('csrfToken') !== ctx.session.csrfToken) {
-    error(
-      `CSR-Token mismatch: header:${ctx.cookies.get('csrfToken')} - `
-      + `session:${ctx.session.csrfToken}`
-    )
-    status = 401
-    body = { error: 'csrf token mismatch' }
+  }
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+    ctx.status = 401
+    ctx.body = { error: 'csrf token mismatch' }
   } else {
     log(`album id: ${ctx.params.id}`)
     log(`image name: ${ctx.params.name}`)
@@ -929,7 +969,13 @@ router.post(
     } else {
       imageHide = true
     }
-    if (doTokensMatch(ctx)) {
+    const csrfTokenCookie = ctx.cookies.get('csrfToken')
+    const csrfTokenSession = ctx.session.csrfToken
+    if (!doTokensMatch(ctx)) {
+      error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+      ctx.status = 401
+      ctx.body = { error: 'csrf token mismatch' }
+    } else {
       try {
         const db = ctx.state.mongodb.client.db().collection('albums')
         album = await Albums.getById(db, albumId, redis)
@@ -940,7 +986,9 @@ router.post(
           i.rotateFullSize = imageRotateFullSize
         }
         if (imageRotateThumbnail && thumbnailName) {
-          log(`Rotate thumbnail image ${thumbnailName} counter-clockwise ${imageRotateThumbnail}`)
+          log(
+            `Rotate thumbnail image ${thumbnailName} counter-clockwise ${imageRotateThumbnail}`
+          )
           i.thumbnailName = thumbnailName
           i.rotateThumbnail = imageRotateThumbnail
         }
@@ -983,7 +1031,8 @@ router.post(
 router.post(
   'accountEditGallery',
   '/account/gallery/:id',
-  hasFlash, processFormData,
+  hasFlash,
+  processFormData,
   async (ctx) => {
   const log = accountLog.extend('POST-account-gallery-edit')
   const error = accountError.extend('POST-account-gallery-edit')
@@ -1017,7 +1066,13 @@ router.post(
       ? Array.from(ctx.request.body?.albumKeywords?.[0]?.split(', '))
       : []
     const albumPreviewImage = ctx.request.body?.albumPreviewImage?.[0] ?? null
-    if (doTokensMatch(ctx)) {
+    const csrfTokenCookie = ctx.cookies.get('csrfToken')
+    const csrfTokenSession = ctx.session.csrfToken
+    if (!doTokensMatch(ctx)) {
+      error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+      ctx.status = 401
+      ctx.body = { error: 'csrf token mismatch' }
+    } else {
       try {
         const db = ctx.state.mongodb.client.db().collection('albums')
         album = await Albums.getById(db, albumId, redis)
@@ -1165,7 +1220,13 @@ router.delete(
     log('ctx.files: %o', ctx.request.files)
     let album
     const albumId = ctx.request.body?.albumId?.[0] ?? ''
-    if (doTokensMatch(ctx)) {
+    const csrfTokenCookie = ctx.cookies.get('csrfToken')
+    const csrfTokenSession = ctx.session.csrfToken
+    if (!doTokensMatch(ctx)) {
+      error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+      ctx.status = 401
+      ctx.body = { error: 'csrf token mismatch' }
+    } else {
       try {
         const db = ctx.state.mongodb.client.db().collection('albums')
         album = await Albums.getById(db, albumId, redis)
@@ -1204,7 +1265,13 @@ router.put('accountGalleriesAdd', '/account/galleries/add', processFormData, asy
     error('Tried to upload an album archive without first being authenticated.')
     ctx.redirect('/')
   }
-  if (doTokensMatch(ctx)) {
+  const csrfTokenCookie = ctx.cookies.get('csrfToken')
+  const csrfTokenSession = ctx.session.csrfToken
+  if (!doTokensMatch(ctx)) {
+    error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+    ctx.status = 401
+    ctx.body = { error: 'csrf token mismatch' }
+  } else {
     log('ctx.fields: %o', ctx.request.body)
     // log('ctx.files: %o', ctx.request.files)
     log('uploaded filepath: ', ctx.request.files?.PersistentFile?.filepath)
@@ -1237,7 +1304,11 @@ router.put('accountGalleriesAdd', '/account/galleries/add', processFormData, asy
     log(archive)
     if (archive.size > 0) {
       let newName = null
-      newPath = path.resolve(ctx.app.dirs.public.dir, ctx.state.sessionUser.publicDir, galleries)
+      newPath = path.resolve(
+        ctx.app.dirs.public.dir,
+        ctx.state.sessionUser.publicDir,
+        galleries,
+      )
       try {
         log(`uploads: ${ctx.app.dirs.private.uploads}`)
         log(`username: ${ctx.state.sessionUser.username}`)
@@ -1435,7 +1506,13 @@ router.post('accountEditPost', '/account/edit', hasFlash, processFormData, async
   } else {
     log('ctx.fields: %O', ctx.request.body)
     log('ctx.files: %O', ctx.request.files)
-    if (doTokensMatch(ctx)) {
+    const csrfTokenCookie = ctx.cookies.get('csrfToken')
+    const csrfTokenSession = ctx.session.csrfToken
+    if (!doTokensMatch(ctx)) {
+      error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+      ctx.status = 401
+      ctx.body = { error: 'csrf token mismatch' }
+    } else {
       // const { firstname } = ctx.request.body
       const [firstname] = ctx.request.body.firstname
       if (firstname !== '') ctx.state.sessionUser.firstName = firstname
@@ -1780,7 +1857,13 @@ router.post(
   } else {
     try {
       const users = new Users(ctx.state.mongodb, ctx)
-      if (doTokensMatch(ctx)) {
+      const csrfTokenCookie = ctx.cookies.get('csrfToken')
+      const csrfTokenSession = ctx.session.csrfToken
+      if (!doTokensMatch(ctx)) {
+        error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+        ctx.status = 401
+        ctx.body = { error: 'csrf token mismatch' }
+      } else {
         const [username] = ctx.request.body.username
         let displayUser = await users.getByUsername(username)
         if (username !== '') {
@@ -1945,11 +2028,16 @@ router.delete(
     //
     const csrfTokenCookie = ctx.cookies.get('csrfToken')
     const csrfTokenSession = ctx.session.csrfToken
-    const { id, csrfTokenForm } = ctx.request.body
+    const [id] = ctx.request.body.id
+    const [csrfTokenForm] = ctx.request.body.csrfTokenForm
     const db = ctx.state.mongodb.client.db()
     const collection = db.collection(USERS)
     const users = new Users(collection, ctx)
-    if (csrfTokenCookie === csrfTokenSession && csrfTokenSession === csrfTokenForm) {
+    if (!doTokensMatch(ctx)) {
+      error(`CSR-Token mismatch: header:${csrfTokenCookie} - session:${csrfTokenSession}`)
+      ctx.status = 401
+      ctx.body = { error: 'csrf token mismatch' }
+    } else {
       try {
         // let displayUser = await users.getById(id)
         const displayUser = await users.archiveUser(ctx, id)
@@ -1980,18 +2068,6 @@ router.delete(
         }
       } catch (e) {
         error(`Error from users.getById(${id})`)
-      }
-    } else {
-      log('CSRF Token mismatch.  No delete made.')
-      log(`session token: ${csrfTokenSession}`)
-      log(` cookie token: ${csrfTokenCookie}`)
-      log(`   form token: ${csrfTokenForm}`)
-      ctx.status = 403
-      ctx.type = 'application/json'
-      ctx.body = {
-        status: 403,
-        error: 'Error, csrf tokens do not match',
-        message: null,
       }
     }
   }
