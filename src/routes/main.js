@@ -7,8 +7,8 @@
 
 import Router from '@koa/router'
 // import { ObjectId } from 'mongodb'
-import { Albums } from '@mattduffy/albums/Albums' // eslint-disable-line import/no-unresolved
-import { Blogs } from '@mattduffy/blogs' // eslint-disable-line import/no-unresolved
+import { Albums } from '@mattduffy/albums/Albums'
+import { Blogs } from '@mattduffy/blogs'
 // import { Users } from '../models/users.js'
 import {
   addIpToSession,
@@ -150,7 +150,6 @@ router.get('renderTest', '/renderTest', async (ctx) => {
     isAuthenticated: false,
   })
   log(rendered)
-  ctx.redirect('/')
 })
 
 export { router as main }

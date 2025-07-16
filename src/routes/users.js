@@ -5,12 +5,10 @@
  * @file src/routes/users.js The router for the user api endpoints.
  */
 
-/* eslint-disable no-unused-vars */
 import Router from '@koa/router'
 import { ObjectId } from 'mongodb'
 import { _log, _error } from '../utils/logging.js'
 import { Users, AdminUser } from '../models/users.js'
-/* eslint-enable no-unused-vars */
 
 const userLog = _log.extend('/users')
 const userError = _error.extend('/users')
