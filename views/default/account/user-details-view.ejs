@@ -91,11 +91,15 @@
             <figure>
               <picture>
                 <% if (sessionUser.avatar !== '') { %>
-                <source srcset="<%= `${origin}/${sessionUser?.avatar}`%>" media="(min-width: 1200px)" id="avatar-big" width="350px" alt="avatar image">
-                <source srcset="<%= `${origin}/${sessionUser?.avatar}`%>" media="(min-width: 600px)" id="avatar-med" width="300px" alt="avatar image">
-                <source srcset="<%= `${origin}/${sessionUser?.avatar}`%>" media="(min-width: 300px)" id="avatar-sml" width="250px" alt="avatar image">
+                <source srcset="<%= `${origin}/${sessionUser?.avatar}`%>" 
+                  media="(min-width: 1200px)" id="avatar-big" width="350px" alt="avatar image">
+                <source srcset="<%= `${origin}/${sessionUser?.avatar}`%>" 
+                  media="(min-width: 600px)" id="avatar-med" width="300px" alt="avatar image">
+                <source srcset="<%= `${origin}/${sessionUser?.avatar}`%>" 
+                  media="(min-width: 300px)" id="avatar-sml" width="250px" alt="avatar image">
                 <% } %>
-                <img src="<%= defaultAvatar %>" id="defaultAvatar" alt="default avatar image">
+                <img src="<%= `${origin}${defaultAvatar}` %>" id="defaultAvatar" 
+                  alt="default avatar image">
                 <% if (sessionUser.avatar === '') { %>
                 <figcaption>
                   <span class="smallem">Default avatar.  No avatar image uploaded yet.</span><br>
@@ -110,11 +114,15 @@
             <figure>
               <picture>
                 <% if (sessionUser.header !== '') { %>
-                <source srcset="<%= `${origin}/${sessionUser?.header}` %>" media="(min-width: 1000px)" id="header-big" width="350px" alt="header image">
-                <source srcset="<%= `${origin}/${sessionUser?.header}` %>" media="(min-width: 600px)" id="header-med" width="300px" alt="header image">
-                <source srcset="<%= `${origin}/${sessionUser?.header}` %>" media="(min-width: 300px)" id="header-sml" width="250px" alt="header image">
+                <source srcset="<%= `${origin}/${sessionUser?.header}` %>" 
+                  media="(min-width: 1000px)" id="header-big" width="350px" alt="header image">
+                <source srcset="<%= `${origin}/${sessionUser?.header}` %>" 
+                  media="(min-width: 600px)" id="header-med" width="300px" alt="header image">
+                <source srcset="<%= `${origin}/${sessionUser?.header}` %>" 
+                  media="(min-width: 300px)" id="header-sml" width="250px" alt="header image">
                 <% } %>
-                <img src="<%= defaultHeader %>" id="defaultHeader" alt="default header image">
+                <img src="<%= `${origin}${defaultHeader}` %>" id="defaultHeader" 
+                  alt="default header image">
                 <% if (sessionUser.header === '') { %>
                 <figcaption>
                   <span class="smallem">Default header.  No header image uploaded yet.</span><br>
