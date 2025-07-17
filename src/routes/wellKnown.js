@@ -6,9 +6,9 @@
  */
 
 import Router from '@koa/router'
-import NodeInfo from '@mattduffy/webfinger/nodeinfo.js' // eslint-disable-line import/no-unresolved
-import Hostmeta from '@mattduffy/webfinger/host-meta.js' // eslint-disable-line import/no-unresolved
-import Webfinger from '@mattduffy/webfinger/webfinger.js' // eslint-disable-line import/no-unresolved
+import NodeInfo from '@mattduffy/webfinger/nodeinfo.js'
+import Hostmeta from '@mattduffy/webfinger/host-meta.js'
+import Webfinger from '@mattduffy/webfinger/webfinger.js'
 import { App } from '../models/app.js'
 import { _log, _info, _error } from '../utils/logging.js'
 
@@ -144,7 +144,6 @@ router.get('host-meta', '/.well-known/host-meta', async (ctx, next) => {
   let info
   try {
     // const host = `${ctx.request.protocol}://${ctx.request.host}`
-    // const host = ctx.request.origin
     const host = ctx.state.host
     const o = { path: ctx.request.path, host }
     const meta = new Hostmeta(o)
@@ -174,7 +173,6 @@ router.get('webfinger', '/.well-known/webfinger', async (ctx, next) => {
     error('Missing db connection')
     ctx.status = 500
     ctx.type = 'text/plain; charset=utf-8'
-    // ctx.throw(500, 'Missing database connection.')
     const err = new Error('Missing database connection.')
     ctx.throw(500, err)
   }
@@ -223,19 +221,10 @@ router.get('webfinger', '/.well-known/webfinger', async (ctx, next) => {
   } catch (e) {
     error(e)
     ctx.status = 500
-    // ctx.throw(500, 'Webfinger failure - 100', e)
     const err = new Error('Webfinger failure - 100', { cause: e })
     ctx.throw(500, err)
   }
   return next()
-  // try {
-  //   log('awaiting next return')
-  //   await next()
-  // } catch (e) {
-  //   error('Webfinger failure - 200')
-  //   error(e)
-  //   ctx.throw(500, 'Webfinger failure - 200', e)
-  // }
 })
 
 router.get('wellknownIndex', '/.well-known', async (ctx) => {
