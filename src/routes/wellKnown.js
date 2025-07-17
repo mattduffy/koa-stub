@@ -50,7 +50,6 @@ router.get('jwks-json', '/.well-known/jwks.json', async (ctx) => {
     log(keys)
   } catch (e) {
     error(e)
-    // ctx.throw(500, e)
     const err = new Error('', { cause: e })
     ctx.throw(500, err)
   }
@@ -60,7 +59,6 @@ router.get('jwks-json', '/.well-known/jwks.json', async (ctx) => {
     log(jwks)
   } catch (e) {
     error(e)
-    // ctx.throw(500, e)
     const err = new Error('', { cause: e })
     ctx.throw(500, err)
   }
@@ -77,7 +75,6 @@ router.get('nodeinfo', '/.well-known/nodeinfo', async (ctx) => {
     error('Missing database connection')
     ctx.status = 500
     ctx.type = 'text/plain; charset=utf-8'
-    // ctx.throw(500, 'Missing db connection')
     const err = new Error('Missing db connection')
     ctx.throw(500, err)
   }
@@ -99,7 +96,6 @@ router.get('nodeinfo', '/.well-known/nodeinfo', async (ctx) => {
   } catch (e) {
     error(e)
     ctx.status = 500
-    // ctx.throw(500, 'Nodeinfo failure - 100', e)
     const err = new Error('Nodeinfo failure - 100', { cause: e })
     ctx.throw(500, err)
   }
@@ -117,7 +113,6 @@ router.get('nodeinfo2.1', '/nodeinfo/2.1', async (ctx) => {
     log(info)
   } catch (e) {
     error(e)
-    // ctx.throw(500, e)
     const err = new Error('', { cause: e })
     ctx.throw(500, err)
   }
@@ -143,7 +138,6 @@ router.get('host-meta', '/.well-known/host-meta', async (ctx, next) => {
     await next()
   } catch (e) {
     error('Hostmeta failure - 200')
-    // ctx.throw(500, 'Hostmeta failure - 200', e)
     const err = new Error('Hostmeta failure - 200', { cause: e })
     ctx.throw(500, err)
   }
@@ -151,7 +145,7 @@ router.get('host-meta', '/.well-known/host-meta', async (ctx, next) => {
   try {
     // const host = `${ctx.request.protocol}://${ctx.request.host}`
     // const host = ctx.request.origin
-    const host = ctx.request.host
+    const host = ctx.state.host
     const o = { path: ctx.request.path, host }
     const meta = new Hostmeta(o)
     info = meta.info()
@@ -168,7 +162,6 @@ router.get('host-meta', '/.well-known/host-meta', async (ctx, next) => {
   } catch (e) {
     error(e)
     ctx.status = 500
-    // ctx.throw(500, 'Hostmeta failure - 100', e)
     const err = new Error('Hostmeta failure - 100', { cause: e })
     ctx.throw(500, err)
   }
