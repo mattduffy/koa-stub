@@ -163,7 +163,7 @@ async function proxyCheck(ctx, next) {
 }
 
 async function openGraph(ctx, next) {
-  // const logg = log.extend('openGraph')
+  const logg = log.extend('openGraph')
   // const err = error.extend('openGraph')
   const ogArray = []
   ogArray.push('<meta property="og:type" content="website">')
@@ -176,7 +176,21 @@ async function openGraph(ctx, next) {
   ogArray.push('<meta property="og:image:height" content="295">')
   ogArray.push('<meta property="og:image:alt" content="Things that Matt made.">')
   ogArray.push('<meta property="og:description" content="Things that Matt made.">')
-  ctx.state.openGraph = ogArray.join('\n')
+  // ctx.state.openGraph = ogArray.join('\n')
+  const twitArray = []
+  twitArray.push('<meta name="twitter:card" content="summary_large_image">')
+  twitArray.push('<meta property="twitter:domain" content="mattmadethese.com">')
+  twitArray.push('<meta property="twitter:url" content="'
+    + `${ctx.request.href}${ctx.request.search}">`
+  )
+  twitArray.push('<meta name="twitter:image" content="'
+    + `${ctx.state.origin}/i/plane-450x295.jpg">`
+  )
+  twitArray.push('<meta name="twitter:title" content="Matt Made These.">')
+  twitArray.push('<meta name="twitter:description" content='
+    + '"Things that Matt made.">'
+  )
+  ctx.state.openGraph = ogArray.concat(twitArray).join('\n')
   // logg(ctx.state.openGraph)
   await next()
 }
