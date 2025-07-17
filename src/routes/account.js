@@ -552,7 +552,7 @@ router.post(
       : []
     const postPublic = (ctx.request.body?.postPublic)
       ? ((ctx.request.body.postPublic[0] === 'true') ? true : false)
-      : false // eslint-disable-line
+      : false
     if (ctx.request.files?.postPreviewImageSmall) {
       [smallImg] = ctx.request.files.postPreviewImageSmall
       const originalNameSmall = smallImg.originalFilename
@@ -1449,9 +1449,7 @@ router.get('accountView', '/account/view', hasFlash, async (ctx) => {
       // csrfToken: new ObjectId().toString(),
       csrfToken: ulid(),
       isAuthenticated: ctx.state.isAuthenticated,
-      // defaultAvatar: `${ctx.request.origin}/i/accounts/avatars/missing.png`,
       defaultAvatar: '/i/accounts/avatars/missing.png',
-      // defaultHeader: `${ctx.request.origin}/i/accounts/headers/generic.png`,
       defaultHeader: '/i/accounts/headers/generic.png',
       title: `${ctx.app.site}: View Account Details`,
     }
@@ -1767,11 +1765,8 @@ router.get('adminViewUser', '/admin/account/view/:username', hasFlash, async (ct
       locals.isAuthenticated = ctx.state.isAuthenticated
       locals.jwtAccess = (ctx.state.sessionUser.jwts).token
       locals.title = `${ctx.app.site}: View ${ctx.params.username}`
-      // locals.defaultAvatar = `${ctx.request.origin}/i/missing.png`
       locals.defaultAvatar = '/i/missing.png'
-      // locals.defaultHeader = `${ctx.request.origin}/i/missing.png`
-      // locals.defaultHeader = `${ctx.origin}/i/missing.png`
-      locals.defaultHeader = 'i/missing.png'
+      locals.defaultHeader = '/i/missing.png'
     } catch (e) {
       error(`Error trying to retrieve ${ctx.params.username}'s account.`)
       error(e)
