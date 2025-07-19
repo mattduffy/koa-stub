@@ -24,7 +24,7 @@ import { Blog, Blogs, slugify } from '@mattduffy/blogs'
 import { Album } from '@mattduffy/albums'
 import { Albums } from '@mattduffy/albums/Albums'
 import { Unpacker } from '@mattduffy/unpacker'
-import { redis } from '../daos/impl/redis/redis-client.js'
+import { ioredis } from '../daos/impl/redis/ioredis-client.js'
 
 const USERS = 'users'
 const accountLog = _log.extend('account')
@@ -314,7 +314,7 @@ router.get('accountBlog', '/account/blog', hasFlash, async (ctx) => {
     // Get list of blogs, if they exist
     const { username } = ctx.state.sessionUser
     log(`username for blog owner: ${username}`)
-    const blog = await Blogs.getByUsername(db, username, redis) ?? {}
+    const blog = await Blogs.getByUsername(db, username, ioredis) ?? {}
     log(`found ${username}'s blog: ${blog.title}`)
     const posts = await blog.posts(0, 'all')
     log(`found ${posts.length} posts. `, posts)
@@ -430,10 +430,10 @@ router.post('accountBlogEdit', '/account/blog/edit', hasFlash, processFormData, 
         o.headerImageBig = bigImgPath
       }
       if (!blogId) {
-        blog = await Blogs.newBlog(db, o, redis)
+        blog = await Blogs.newBlog(db, o, ioredis)
         blog.url = blogTitle
       } else {
-        blog = await Blogs.getById(db, blogId, redis)
+        blog = await Blogs.getById(db, blogId, ioredis)
         blog.public = blogPublic
         blog.title = blogTitle
         blog.url = blogTitle
@@ -490,7 +490,7 @@ router.get('accountListBlogPosts', '/account/blog/posts', hasFlash, async (ctx) 
       //
       // TODO: implement Blogs.getByCreator() method
       //
-      const blog = await Blogs.getByCreator(db, ctx.state.sessionUser.username, redis)
+      const blog = await Blogs.getByCreator(db, ctx.state.sessionUser.username, ioredis)
       const posts = await blog.getPosts()
       log(`blog slug: ${blog.url}`)
       status = 200
@@ -560,7 +560,7 @@ router.post(
       createPostAlbum = true
     }
     try {
-      blog = await Blogs.getById(ctx.state.mongodb.client.db(), blogId, redis)
+      blog = await Blogs.getById(ctx.state.mongodb.client.db(), blogId, ioredis)
       log(`${blog}`)
       if (!postId) {
         const newPost = {
@@ -681,7 +681,7 @@ router.get('accountBlogPostNew', '/account/blog/post/new', hasFlash, async (ctx)
     // Get list of blogs, if they exist
     const { username } = ctx.state.sessionUser
     log(`username for blog owner: ${username}`)
-    const blog = await Blogs.getByUsername(db, username, redis) ?? {}
+    const blog = await Blogs.getByUsername(db, username, ioredis) ?? {}
     log(`found ${username}'s blog: ${blog.name}`)
     const post = {}
     const csrfToken = ulid()
@@ -718,7 +718,7 @@ router.get('accountBlogPostNew', '/account/blog/post/:id', hasFlash, async (ctx)
     const db = ctx.state.mongodb.client.db()
     // Get list of blogs, if they exist
     const { username } = ctx.state.sessionUser
-    const blog = await Blogs.getByUsername(db, username, redis) ?? {}
+    const blog = await Blogs.getByUsername(db, username, ioredis) ?? {}
     log(`found ${username}'s blog: ${blog.title}`)
     const post = await blog.getPost(ctx.params.id)
     if (!post) {
@@ -764,7 +764,7 @@ router.get('accountEditGallery', '/account/gallery/:id', hasFlash, async (ctx) =
     ctx.session.csrfToken = csrfToken
     ctx.cookies.set('csrfToken', csrfToken, { httpOnly: true, sameSite: 'strict' })
     const db = ctx.state.mongodb.client.db()
-    const album = await Albums.getById(db, ctx.params.id, redis)
+    const album = await Albums.getById(db, ctx.params.id, ioredis)
     log(album)
     log(`album keywords: ${album.keywords}`)
     const locals = {
@@ -815,7 +815,7 @@ router.delete(
   } else {
     try {
       const db = ctx.state.mongodb.client.db()
-      album = await Albums.getById(db, albumId, redis)
+      album = await Albums.getById(db, albumId, ioredis)
       log(image)
       log(album)
       const deleted = await album.deleteImage(image)
@@ -877,7 +877,7 @@ router.put(
       let newImageAlbumDirPath
       try {
         const db = ctx.state.mongodb.client.db().collection('albums')
-        album = await Albums.getById(db, albumId, redis)
+        album = await Albums.getById(db, albumId, ioredis)
         albumDir = album.albumDir
         log(`albumDir: ${albumDir}`)
         newImageAlbumDirPath = path.join(albumDir, originalFilenameCleaned)
@@ -978,7 +978,7 @@ router.post(
     } else {
       try {
         const db = ctx.state.mongodb.client.db().collection('albums')
-        album = await Albums.getById(db, albumId, redis)
+        album = await Albums.getById(db, albumId, ioredis)
         const i = {}
         i.name = imageName
         if (imageRotateFullSize) {
@@ -1075,7 +1075,7 @@ router.post(
     } else {
       try {
         const db = ctx.state.mongodb.client.db().collection('albums')
-        album = await Albums.getById(db, albumId, redis)
+        album = await Albums.getById(db, albumId, ioredis)
         if (album.name !== albumName) {
           log(`updating album name from: ${album.name} to: ${albumName}`)
           album.name = albumName
@@ -1229,7 +1229,7 @@ router.delete(
     } else {
       try {
         const db = ctx.state.mongodb.client.db().collection('albums')
-        album = await Albums.getById(db, albumId, redis)
+        album = await Albums.getById(db, albumId, ioredis)
         const deleted = await album.deleteAlbum()
         status = 200
         if (deleted === undefined) {
@@ -1344,7 +1344,7 @@ router.put('accountGalleriesAdd', '/account/galleries/add', processFormData, asy
       try {
         const config = {
           new: true,
-          redis,
+          ioredis,
           collection: db.collection('albums'),
           rootDir: newPath,
           albumUrl: `${ctx.state.sessionUser.url}/${galleries}/${albumNameDir}`,

@@ -70,9 +70,11 @@ const redisConnOpts = {
     // return false
   },
 }
+// const ioredis = redisStore(redisConnOpts)
 const redis = redisStore(redisConnOpts)
 
 const config = {
+  // store: ioredis,
   store: redis,
   key: redisEnv.SESSION_KEY ?? 'session',
   maxAge: redisEnv.SESSION_1_DAY * 2 ?? (86400000 * 2),
@@ -86,4 +88,9 @@ const config = {
   sameSite: null,
 }
 
-export { session, config, redis }
+export {
+  session,
+  config,
+  redis,
+  // ioredis,
+}
