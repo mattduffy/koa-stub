@@ -1,7 +1,8 @@
 /**
  * @module @mattduffy/koa-stub
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/daos/imple/redis/redis-client.js The low-level connection object of redis.
+ * @summary The low-level connection object of redis - using the ioredis package.
+ * @file src/daos/imple/redis/ioredis-client.js
  */
 
 import path from 'node:path'
@@ -13,10 +14,14 @@ import * as Dotenv from 'dotenv'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const root = path.resolve(`${__dirname}/../../../..`)
-console.log('redis-client.js >>root = ', root)
+console.log('ioredis-client.js >>root = ', root)
 const showDebug = process.env.NODE_ENV !== 'production'
 const redisEnv = {}
-Dotenv.config({ path: path.resolve(root, 'config/redis.env'), processEnv: redisEnv, debug: showDebug })
+Dotenv.config({
+  path: path.resolve(root, 'config/redis.env'),
+  processEnv: redisEnv,
+  debug: showDebug,
+})
 
 const sentinelPort = redisEnv.REDIS_SENTINEL_PORT ?? 26379
 const redisConnOpts = {
