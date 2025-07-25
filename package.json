@@ -19,7 +19,7 @@
     "package.json": "./package.json"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "DEBUG=* node --test test/test-redis-connect.js",
     "bootstrap": "DEBUG_DEPTH=2 DEBUG=* node src/utils/bootstrap.js",
     "newUser": "DEBUG_DEPTH=2 DEBUG=* node src/utils/newUser.js",
     "dev": "DEBUG_DEPTH=2 DEBUG=* node src/index.js",
