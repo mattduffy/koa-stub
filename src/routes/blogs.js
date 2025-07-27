@@ -11,7 +11,8 @@ import { Albums } from '@mattduffy/albums/Albums' // eslint-disable-line import/
 import { Blogs } from '@mattduffy/blogs' // eslint-disable-line import/no-unresolved
 // import { Users } from '../models/users.js'
 import { _log, _error } from '../utils/logging.js'
-import { redis } from '../daos/impl/redis/redis-client.js'
+// import { redis } from '../daos/impl/redis/redis-client.js'
+import { ioredis as redis } from '../daos/impl/redis/ioredis-client.js'
 
 const blogsLog = _log.extend('blogs')
 const blogsError = _error.extend('blogs')

@@ -14,7 +14,8 @@ import {
   addIpToSession,
 } from './middlewares.js'
 import { _log, _error } from '../utils/logging.js'
-import { redis } from '../daos/impl/redis/redis-client.js'
+// import { redis } from '../daos/impl/redis/redis-client.js'
+import { ioredis as redis } from '../daos/impl/redis/ioredis-client.js'
 
 const mainLog = _log.extend('main')
 const mainError = _error.extend('main')
