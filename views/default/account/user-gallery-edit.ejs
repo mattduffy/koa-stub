@@ -428,8 +428,16 @@
           <fieldset>
             <span class="deleteImage" data-name="<%= image.name %>" data-albumid="<%= album.id %>" data-token="<%= csrfToken %>">Delete this image.</span>
             <figure style="display: inline-block;" data-type="fullsize" data-name="<%= image.name %>">
+              <% if (image.big) { %>
               <img src="<%= `${origin}/${image.big}` %>" alt="<%= image.description %>" class="imgFull" width="150px">
               <figcaption>Full size image.</figcaption>
+              <% } else if (image.med) { %>
+              <img src="<%= `${origin}/${image.med}` %>" alt="<%= image.description %>" class="imgFull" width="150px">
+              <figcaption>Meduim sized image.</figcaption>
+              <% } else { %>
+              <img src="<%= `${origin}/${image.url}` %>" alt="<%= image.description %>" class="imgFull" width="150px">
+              <figcaption>Original sized image.</figcaption>
+              <% } %>
             </figure>
             <% if (image.thumbnail) { %>
             <figure style="display: inline-block;" data-type="thumbnail" data-name="<%= image.thumbnail.slice(image.thumbnail.lastIndexOf('/')+1) %>">
