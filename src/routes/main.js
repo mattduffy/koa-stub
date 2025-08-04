@@ -2,7 +2,7 @@
  * @summary Koa router for the main top-level pages.
  * @module @mattduffy/koa-stub
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/routes/main.js The router for the top level app URLs.
+ * @file src/routes/main.js
  */
 
 import Router from '@koa/router'
@@ -14,8 +14,8 @@ import {
   addIpToSession,
 } from './middlewares.js'
 import { _log, _error } from '../utils/logging.js'
-// import { redis } from '../daos/impl/redis/redis-client.js'
-import { ioredis as redis } from '../daos/impl/redis/ioredis-client.js'
+import { redis } from '../daos/impl/redis/redis-client.js'
+import { ioredis } from '../daos/impl/redis/ioredis-client.js'
 
 const mainLog = _log.extend('main')
 const mainError = _error.extend('main')
@@ -59,8 +59,10 @@ router.get('galleries', '/galleries', addIpToSession, hasFlash, async (ctx) => {
   ctx.status = 200
   let recent10
   try {
+    // recent10 = await Albums.recentlyAdded(ioredis)
     recent10 = await Albums.recentlyAdded(redis)
   } catch (e) {
+    error('OOPS')
     error(e)
   }
   log('recent10: ', recent10)
@@ -71,7 +73,7 @@ router.get('galleries', '/galleries', addIpToSession, hasFlash, async (ctx) => {
     error(e)
   }
   log('users with public albums: ', publicAlbums)
-  log('************************** ctx.request inside /galleries handler', ctx)
+  // log('************************** ctx.request inside /galleries handler', ctx)
   const locals = {
     recent10,
     publicAlbums,
@@ -93,6 +95,7 @@ router.get('blogs', '/blog', addIpToSession, hasFlash, async (ctx) => {
   ctx.status = 200
   let recent10
   try {
+    // recent10 = await Blogs.recentlyUpdated(ioredis)
     recent10 = await Blogs.recentlyUpdated(redis)
   } catch (e) {
     error(e)
