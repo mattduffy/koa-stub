@@ -53,6 +53,11 @@ dotenv.config({
   processEnv: appEnv,
   debug: showDebug,
 })
+let aiEnv = {}
+dotenv.config({
+  path: path.resolve(appRoot, 'config/ai.env'),
+  processEnv: aiEnv,
+})
 
 const banner = new Banner({
   name: appEnv.SITE_NAME,
@@ -87,6 +92,7 @@ app.dirs = {
   },
   cache: {
     pages: `${appRoot}/cached_pages`,
+    models: `${appRoot}/${aiEnv.MODEL_CACHE_DIR}`,
   },
   config: `${appRoot}/config`,
   keys: `${appRoot}/keys`,
@@ -104,6 +110,19 @@ app.dirs = {
   },
 }
 appEnv.UPLOADSDIR = app.dirs.private.uploads
+
+async function aiSetup(ctx, next) {
+  ctx.state.ai = {
+    model: aiEnv.EMBEDDING_MODEL,
+    embeddingTask: aiEnv.EMBEDDING_TASK,
+    vectorType: aiEnv.VECTOR_TYPE,
+    vectorAlg: aiEnv.VECTOR_ALGORITHM,
+    vectorDistanceMetric: aiEnv.VECTOR_DIST_METRIC,
+    vectorDIM: aiEnv.VECTOR_DIM,
+  }
+  return next()
+}
+app.use(aiSetup)
 
 const o = {
   db: path.resolve(`${app.root}/src`, 'daos/impl/mongodb/mongo-client.js'),
@@ -206,10 +225,12 @@ async function csp(ctx, next) {
     + 'frame-ancestors \'none\'; '
     + 'object-src \'none\'; '
     + 'form-action \'self\'; '
-    + `style-src 'self' ${ctx.request.protocol}://${ctx.app.domain} 'unsafe-inline' 'nonce-${nonce}'; `
+    + `style-src 'self' ${ctx.request.protocol}://${ctx.app.domain} 'unsafe-inline' `
+      + `'nonce-${nonce}'; `
     + `style-src-attr 'self' ${ctx.request.protocol}://${ctx.app.domain} 'unsafe-inline'; `
     + `style-src-elem 'self' ${ctx.request.protocol}://${ctx.app.domain} 'unsafe-inline'; `
-    + `script-src 'unsafe-inline' 'self' ${ctx.request.protocol}://${ctx.app.domain} 'nonce-${nonce}'; `
+    + `script-src 'unsafe-inline' 'self' ${ctx.request.protocol}://${ctx.app.domain} `
+      + `'nonce-${nonce}'; `
     + `script-src-attr 'self' ${ctx.request.protocol}://${ctx.app.domain} 'nonce-${nonce}'; `
     + `script-src-elem 'self' ${ctx.request.protocol}://${ctx.app.domain} 'nonce-${nonce}'; `
     + `img-src 'self' data: blob: ${ctx.request.protocol}://${ctx.app.domain}; `
@@ -219,7 +240,8 @@ async function csp(ctx, next) {
     + `child-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
     + `worker-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
     + `manifest-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain}; `
-    + `connect-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain} wss://${ctx.app.domain}; `
+    + `connect-src 'self' blob: ${ctx.request.protocol}://${ctx.app.domain} `
+      + `wss://${ctx.app.domain}; `
   ctx.set('Content-Security-Policy', policy)
   logg(`Content-Security-Policy: ${policy}`)
   try {
