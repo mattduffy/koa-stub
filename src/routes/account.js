@@ -2,7 +2,7 @@
  * @summary Koa router for the account api endpoints.
  * @module @mattduffy/koa-stub
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/routes/account.js The router for the account api endpoints.
+ * @file src/routes/account.js
  */
 
 import Router from '@koa/router'
@@ -18,12 +18,13 @@ import {
   processFormData,
   hasFlash,
 } from './middlewares.js'
-import { _log, _error } from '../utils/logging.js'
-import { Users, AdminUser } from '../models/users.js'
-import { Blog, Blogs, slugify } from '@mattduffy/blogs'
 import { Album } from '@mattduffy/albums'
 import { Albums } from '@mattduffy/albums/Albums'
 import { Unpacker } from '@mattduffy/unpacker'
+import { Blog, Blogs, slugify } from '@mattduffy/blogs'
+import { _log, _error } from '../utils/logging.js'
+import { Users, AdminUser } from '../models/users.js'
+import { redis } from '../daos/impl/redis/redis-client.js'
 import { ioredis } from '../daos/impl/redis/ioredis-client.js'
 
 const USERS = 'users'
