@@ -39,6 +39,7 @@
     "@mattduffy/blogs": "file:../blogs",
     "@mattduffy/exiftool": "file:../exiftool",
     "@mattduffy/koa-migrations": "file:../koa-migrations",
+    "@mattduffy/koa-redis": "file:../koa-redis",
     "@mattduffy/unpacker": "file:../unpacker",
     "@mattduffy/users": "file:../users",
     "@mattduffy/webfinger": "file:../webfinger",
