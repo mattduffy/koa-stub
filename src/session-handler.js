@@ -77,6 +77,7 @@ const ioredisConnOpts = {
 }
 // const ioredis = redisStore(ioredisConnOpts)
 const redisConnOpts = {
+  keyPrefix: `${redisEnv.REDIS_KEY_PREFIX}:sessions:` ?? 'koa:sessions:',
   sentinelRootNodes: [
     { host: redisEnv.REDIS_SENTINEL_01, port: sentinelPort },
     { host: redisEnv.REDIS_SENTINEL_02, port: sentinelPort },
@@ -125,7 +126,7 @@ const config = {
   secure: (redisEnv.SESSION_SECURE.toLowerCase() === 'true') ?? true,
   httpOnly: (redisEnv.SESSION_HTTPONLY.toLowerCase() === 'true') ?? true,
   signed: (redisEnv.SESSION_SIGNED.toLowerCase() === 'true') ?? true,
-  sameSite: null,
+  // sameSite: null,
 }
 console.log('koa-session config opts', config)
 export {
