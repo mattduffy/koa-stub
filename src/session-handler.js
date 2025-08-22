@@ -18,7 +18,11 @@ const __dirname = path.dirname(__filename)
 const root = path.resolve(`${__dirname}/..`)
 const showDebug = process.env.NODE_ENV !== 'production'
 const redisEnv = {}
-dotenv.config({ path: path.resolve(root, 'config/sessions.env'), processEnv: redisEnv, debug: showDebug })
+dotenv.config({
+  path: path.resolve(root, 'config/sessions.env'),
+  processEnv: redisEnv,
+  debug: showDebug,
+})
 
 // console.log('redis_user: ', redisEnv.REDIS_USER)
 // console.log('redis_pwd: ', redisEnv.REDIS_PASSWORD)
@@ -104,7 +108,10 @@ const redisConnOpts = {
   role: 'master',
 }
 // const redis = redisStore(redisConnOpts)
-const redis = redisStore.c(redisConnOpts)
+const redis = await redisStore.init(redisConnOpts)
+console.log(
+  'did redisStore init work?', await redis.ping()
+)
 
 const config = {
   // store: ioredis,
@@ -120,7 +127,7 @@ const config = {
   signed: (redisEnv.SESSION_SIGNED.toLowerCase() === 'true') ?? true,
   sameSite: null,
 }
-
+console.log('koa-session config opts', config)
 export {
   session,
   config,
