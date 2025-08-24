@@ -1,7 +1,8 @@
 /**
  * @module @mattduffy/koa-stub
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/session-handler.js The setup and configuration of the koa app session handler.
+ * @summary The setup and configuration of the koa app session handler.
+ * @file src/session-handler.js
  */
 
 // import fs from 'node:fs/promises'
@@ -108,7 +109,7 @@ const redisConnOpts = {
   lazyConnect: true,
   role: 'master',
 }
-// const redis = redisStore(redisConnOpts)
+// const redis = redisStore(ioredisConnOpts)
 const redis = await redisStore.init(redisConnOpts)
 console.log(
   'did redisStore init work?', await redis.ping()
@@ -128,7 +129,7 @@ const config = {
   signed: (redisEnv.SESSION_SIGNED.toLowerCase() === 'true') ?? true,
   // sameSite: null,
 }
-console.log('koa-session config opts', config)
+// console.log('koa-session config opts', config)
 export {
   session,
   config,
