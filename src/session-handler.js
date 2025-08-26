@@ -78,6 +78,7 @@ const ioredisConnOpts = {
 }
 // const ioredis = redisStore(ioredisConnOpts)
 const redisConnOpts = {
+  isRedisReplset: true,
   keyPrefix: `${redisEnv.REDIS_KEY_PREFIX}:sessions:` ?? 'koa:sessions:',
   sentinelRootNodes: [
     { host: redisEnv.REDIS_SENTINEL_01, port: sentinelPort },
