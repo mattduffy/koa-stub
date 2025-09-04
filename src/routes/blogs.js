@@ -1,18 +1,17 @@
 /**
- * @summary Koa router for the blogs level pages.
  * @module @mattduffy/koa-stub
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/routes/main.js The router for the blogs level app URLs.
+ * @summary Koa router for the blogs level pages.
+ * @file src/routes/main.js
  */
 
 import Router from '@koa/router'
 // import { ObjectId } from 'mongodb'
-import { Albums } from '@mattduffy/albums/Albums' // eslint-disable-line import/no-unresolved
-import { Blogs } from '@mattduffy/blogs' // eslint-disable-line import/no-unresolved
+import { Albums } from '@mattduffy/albums/Albums'
+import { Blogs } from '@mattduffy/blogs'
 // import { Users } from '../models/users.js'
 import { _log, _error } from '../utils/logging.js'
-// import { redis } from '../daos/impl/redis/redis-client.js'
-import { ioredis as redis } from '../daos/impl/redis/ioredis-client.js'
+import { redis } from '../daos/impl/redis/redis-client.js'
 
 const blogsLog = _log.extend('blogs')
 const blogsError = _error.extend('blogs')
