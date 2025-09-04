@@ -1,8 +1,8 @@
 /**
- * @summary Koa router for the gallery level pages.
  * @module @mattduffy/koa-stub
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/routes/main.js The router for the gallery level app URLs.
+ * @summary Koa router for the gallery level pages.
+ * @file src/routes/main.js
  */
 
 import path from 'node:path'
@@ -12,8 +12,7 @@ import { Albums } from '@mattduffy/albums/Albums' // eslint-disable-line import/
 import { Users } from '../models/users.js'
 // import { Blogs } from '@mattduffy/blogs' // eslint-disable-line import/no-unresolved
 import { _log, _error } from '../utils/logging.js'
-// import { redis } from '../daos/impl/redis/redis-client.js'
-import { ioredis as redis } from '../daos/impl/redis/ioredis-client.js'
+import { redis } from '../daos/impl/redis/redis-client.js'
 
 const galleriesLog = _log.extend('galleries')
 const galleriesError = _error.extend('galleries')
