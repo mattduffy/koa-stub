@@ -8,7 +8,6 @@
 import path from 'node:path'
 import fs from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
-// import { Redis } from 'ioredis'
 import { createSentinel } from 'redis'
 import * as Dotenv from 'dotenv'
 
@@ -24,7 +23,6 @@ Dotenv.config({
   debug: showDebug,
 })
 
-let tracer = []
 const sentinelPort = redisEnv.REDIS_SENTINEL_PORT ?? 26379
 const redisConnOpts = {
   sentinelRootNodes: [
@@ -61,20 +59,17 @@ console.log(redisConnOpts)
 let sentinel
 try {
   sentinel = await createSentinel(redisConnOpts)
-    .on("reconnecting", () => {
-      console.log("Redis sentinel reconnecting");
+    .on('reconnecting', () => {
+      console.log('Redis sentinel reconnecting')
     })
     .on('error', err => console.error('Redis Sentinel Error', err))
-    .on("ready", () => {
-      console.log("Redis sentinel connection is ready");
+    .on('ready', () => {
+      console.log('Redis sentinel connection is ready')
     })
 
-    sentinel.setTracer(tracer)
     await sentinel.connect()
-  // const redis = sentinel.master
 } catch (e) {
   console.log(e)
-  console.log('tracer:', tracer)
 }
 export {
   sentinel as redis,
