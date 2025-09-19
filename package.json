@@ -22,6 +22,7 @@
     "test": "DEBUG=* node --test test/test-redis-connect.js",
     "bootstrap": "DEBUG_DEPTH=2 DEBUG=* node src/utils/bootstrap.js",
     "newUser": "DEBUG_DEPTH=2 DEBUG=* node src/utils/newUser.js",
+    "deleteData": "DEBUG_DEPTH=2 DEBUG=* node src/utils/deleteData.js",
     "dev": "DEBUG_DEPTH=2 DEBUG=* node src/index.js",
     "cluster": "DEBUG_DEPTH=2 DEBUG=* node src/cluster.js",
     "cluster-mmt": "DEBUG_DEPTH=2 DEBUG=* node src/cluster.js"
