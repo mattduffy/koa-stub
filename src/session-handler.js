@@ -34,6 +34,7 @@ const sentinelPort = redisEnv.REDIS_SENTINEL_PORT || 26379
 const redisConnOpts = {
   isRedisReplset: true,
   keyPrefix: `${redisEnv.REDIS_KEY_PREFIX}:sessions:` ?? 'koa:sessions:',
+  dataType: 'ReJSON',
   sentinelRootNodes: [
     { host: redisEnv.REDIS_SENTINEL_01, port: sentinelPort },
     { host: redisEnv.REDIS_SENTINEL_02, port: sentinelPort },
@@ -72,7 +73,7 @@ console.log(
 const config = {
   store: redis,
   key: redisEnv.SESSION_KEY ?? 'session',
-  maxAge: redisEnv.SESSION_1_DAY * 2 ?? (86400000 * 2),
+  maxAge: redisEnv.SESSION_1_DAY * 1000 * 3 ?? (86400 * 1000 * 3),
   rolling: (redisEnv.SESSION_ROLLING.toLowerCase() === 'true') ?? true,
   renew: (redisEnv.SESSION_RENEW.toLowerCase() === 'true') ?? true,
   overwrite: true,
