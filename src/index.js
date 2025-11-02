@@ -198,8 +198,8 @@ async function openGraph(ctx, next) {
   // ctx.state.openGraph = ogArray.join('\n')
   const twitArray = []
   twitArray.push('<meta name="twitter:card" content="summary_large_image">')
-  twitArray.push('<meta property="twitter:domain" content="mattmadethese.com">')
-  twitArray.push('<meta property="twitter:url" content="'
+  twitArray.push('<meta name="twitter:domain" content="mattmadethese.com">')
+  twitArray.push('<meta name="twitter:url" content="'
     + `${ctx.request.href}${ctx.request.search}">`
   )
   twitArray.push('<meta name="twitter:image" content="'
