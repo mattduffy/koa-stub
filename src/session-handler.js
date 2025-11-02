@@ -5,10 +5,8 @@
  * @file src/session-handler.js
  */
 
-// import fs from 'node:fs/promises'
 import fs from 'node:fs'
 import session from 'koa-session'
-// import redisStore from 'koa-redis'
 import { redisStore } from '@mattduffy/koa-redis'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
