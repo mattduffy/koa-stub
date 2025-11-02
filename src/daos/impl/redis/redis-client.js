@@ -54,6 +54,7 @@ const redisConnOpts = {
   maxRetriesPerRequest: 3,
   lazyConnect: true,
   role: 'master',
+  keyPrefix: `${redisEnv.REDIS_KEY_PREFIX}:` ?? 'koa:',
 }
 console.log(redisConnOpts)
 let sentinel
@@ -63,11 +64,9 @@ try {
       console.log('Redis sentinel reconnecting')
     })
     .on('error', err => console.error('Redis Sentinel Error', err))
-    .on('ready', () => {
-      console.log('Redis sentinel connection is ready')
-    })
+    .on('ready', () => { console.log('Redis sentinel connection is ready') })
 
-    await sentinel.connect()
+  await sentinel.connect()
 } catch (e) {
   console.log(e)
 }
