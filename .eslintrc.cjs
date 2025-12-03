@@ -1,3 +1,4 @@
+var restrictedGlobals = require('eslint-restricted-globals')
 module.exports = {
   globals: {
     window: true,
