@@ -8,9 +8,9 @@
 import path from 'node:path'
 import { readFile } from 'node:fs/promises'
 import Router from '@koa/router'
-import { Albums } from '@mattduffy/albums/Albums' // eslint-disable-line import/no-unresolved
+import { Albums } from '@mattduffy/albums/Albums'
 import { Users } from '../models/users.js'
-// import { Blogs } from '@mattduffy/blogs' // eslint-disable-line import/no-unresolved
+// import { Blogs } from '@mattduffy/blogs'
 import { _log, _error } from '../utils/logging.js'
 import { redis } from '../daos/impl/redis/redis-client.js'
 
@@ -55,7 +55,10 @@ router.get('usernamePublicGalleryId', '/:username/gallery/:id', hasFlash, async 
   }
   if (username !== displayUser.username) {
     try {
-      const cachedPage = await readFile(path.join(ctx.app.dirs.cache.pages, ctx.path), { encoding: 'utf8' })
+      const cachedPage = await readFile(
+        path.join(ctx.app.dirs.cache.pages, ctx.path),
+        { encoding: 'utf8' },
+      )
       ctx.status = 200
       ctx.type = 'text/html; charset=utf-8'
       ctx.body = cachedPage

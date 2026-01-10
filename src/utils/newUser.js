@@ -1,7 +1,8 @@
 /**
  * @module @mattduffy/koa-glp
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/utils/newUser.js The script to create a new user account.
+ * @file The script to create a new user account.
+ * @file src/utils/newUser.js
  */
 
 import path from 'node:path'
@@ -27,17 +28,17 @@ const appRoot = path.resolve(`${__dirname}/../..`)
 const appEnv = {}
 log(`appRoot: ${appRoot}`)
 dotenv.config({ path: path.resolve(appRoot, 'config/app.env'), processEnv: appEnv, debug: true })
-// log(appEnv)
-// const mongoEnv = {}
-// dotenv.config({ path: path.resolve(appRoot, 'config/mongodb.env'), processEnv: mongoEnv, debug: true })
-// log(mongoEnv)
 
 const program = new Command()
 program.name('newUser')
   .requiredOption('--first <name>', 'User\'s first name')
   .requiredOption('--last <name>', 'User\'s last name')
   .requiredOption('--email <addr>', 'User\'s email address')
-  // .requiredOption('--desc <description>', 'Short description of the account', 'New account created using cli.')
+  .requiredOption(
+    '--desc <description>',
+    'Short description of the account',
+    'New account created using cli.',
+  )
   .requiredOption('--password <password>', 'The new user\'s initial password.')
   .option('-a, --admin', 'Make this user account admin, otherwise regular.')
   .option('-t, --test', 'A test user account, not a real user.')
@@ -75,7 +76,8 @@ const userProps = {
   first: options.first ?? 'First',
   last: options.last ?? 'User',
   emails: [{ primary: email ?? 'new_user@genevalakepiers.com', verified: false }],
-  description: `A new (${(options?.test) ? 'test' : ''}) ${(options?.admin) ? 'admin' : 'user'} account created from the cli.`,
+  description: `A new (${(options?.test) ? 'test' : ''}) `
+    + `${(options?.admin) ? 'admin' : 'user'} account created.`,
   username: `${options.first.toLowerCase()}${options.last.toLowerCase()}`,
   password: options.password,
   jwts: { token: '', refresh: '' },
@@ -87,9 +89,9 @@ const userProps = {
   client: mongoClient.client,
 }
 
-log(mongoClient.uri)
-log('[newUser] DB credentials in use: %O', userProps.client.options.credentials)
-log('[newUser] DB name in use: ', userProps.client.options.dbName)
+// log(mongoClient.uri)
+// log('[newUser] DB credentials in use: %O', userProps.client.options.credentials)
+// log('[newUser] DB name in use: ', userProps.client.options.dbName)
 
 let newUser
 if (options.admin === true) {

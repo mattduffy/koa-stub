@@ -98,7 +98,10 @@ class App {
   async keys() {
     const log = appLog.extend('keys')
     const error = appError.extend('keys')
-    this._keys = (await this._db.findOne({ name: this._siteName }, { projection: { keys: 1 } }))?.keys
+    this._keys = (await this._db.findOne(
+      { name: this._siteName },
+      { projection: { keys: 1 } },
+    ))?.keys
     let needToUpdate = false
     const numSigKeys = this._keys.signing?.length ?? 0
     const numEncKeys = this._keys.encrypting?.length ?? 0
@@ -252,7 +255,7 @@ class App {
     if (open) {
       jwk = (await this.#openKey(j)).toString()
     }
-    // const matches = jwk.match(/(?<key_ops>"key_ops":\[.*\]),(?<ext>"ext":(?:true|false)),(?<kty>"kty":"(?:RSA|AES|ECDSA|HMAC)"),(?<n>"n":"(?<n_val>.*)"),(?<e>"e":".*"),(?<alg>"alg":".*"),(?<kid>"kid":".*"),?(?<use>"use":".*")?/).groups
+    // eslint-disable-next-line
     const matches = jwk.match(/"key_ops":(?<key_ops>\[.*\]),"ext":(?<ext>(true|false)),"kty":(?<kty>".*"),"n":(?<n>".*"),"e":(?<e>".*"),"alg":(?<alg>".*"),"kid":(?<kid>".*"(?=,)),?(?:"use":(?<use>".*"))?/)
     const groups = matches?.groups
     const indent = '  '

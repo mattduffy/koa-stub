@@ -2,13 +2,16 @@
  * @summary Koa router for the user api endpoints.
  * @module @mattduffy/koa-stub
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/routes/users.js The router for the user api endpoints.
+ * @file src/routes/users.js
  */
 
 import Router from '@koa/router'
-import { ObjectId } from 'mongodb'
+// import { ObjectId } from 'mongodb'
 import { _log, _error } from '../utils/logging.js'
-import { Users, AdminUser } from '../models/users.js'
+import {
+  Users,
+  // AdminUser,
+} from '../models/users.js'
 
 const userLog = _log.extend('/users')
 const userError = _error.extend('/users')

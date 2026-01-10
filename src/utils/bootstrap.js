@@ -1,7 +1,8 @@
 /**
  * @module @mattduffy/koa-glp
  * @author Matthew Duffy <mattduffy@gmail.com>
- * @file src/utils/bootstrap.js The script to bootstrap the app.
+ * @summary The script to bootstrap the app.
+ * @file src/utils/bootstrap.js
  */
 
 import path from 'node:path'
@@ -35,7 +36,10 @@ log(mongoEnv)
 // dotenv.config({ path: path.resolve(appRoot, 'config/redis.env'), processEnv: redisEnv })
 // log(process.env.REDIS_KEY_PREFIX)
 // log(process.env.REDIS_SENTINEL_USER)
-// let pier = await readFile(path.resolve(appRoot, 'data/1_city_of_lake_geneva/pier-001.json'), { encoding: 'utf-8' })
+// let pier = await readFile(
+//   path.resolve(appRoot, 'data/1_city_of_lake_geneva/pier-001.json'),
+//   { encoding: 'utf-8' },
+// )
 // pier = pier.replace(/\n/g, '')
 // // pier = JSON.parse(pier)
 // await redis.redis.call('JSON.SET', 'glp:piers:001', '$', pier)

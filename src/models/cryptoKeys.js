@@ -12,7 +12,7 @@ import { _log, _error } from '../utils/logging.js'
 
 const keysLog = _log.extend('Keys_class')
 const keysError = _error.extend('Keys_class')
-const DATABASE = process.env.MONGODB_DBNAME ?? 'koastub'
+// const DATABASE = process.env.MONGODB_DBNAME ?? 'koastub'
 const COLLECTION = 'app'
 
 class CryptoKeys {
@@ -64,7 +64,9 @@ class CryptoKeys {
 
   constructor(config) {
     const log = keysLog.extend('constructor')
+    this.log = log
     const error = keysError.extend('constructor')
+    this.error = error
     this._format = config?.format ?? 'pem'
     this._sigKid = ulid()
     this._encKid = ulid()
@@ -86,7 +88,7 @@ class CryptoKeys {
   }
 
   async generateKey(o) {
-    const log = keysLog.extend('generateKey')
+    // const log = keysLog.extend('generateKey')
     const error = keysError.extend('generateKey')
     const options = { use: 'sig', alg: 'RSA', ...o }
     let keys
@@ -117,10 +119,11 @@ class CryptoKeys {
 
   async export() {
     const log = keysLog.extend('export')
+    log('exporting keys')
     const error = keysError.extend('export')
     if (this.#keys.signing === null && this.#keys.encrypting === null) {
       error('No keys to export.')
-      error(e)
+      // error(e)
       throw new Error('No keys to export.')
     }
     try {
@@ -154,6 +157,7 @@ class CryptoKeys {
   async #exportSigning() {
     const log = keysLog.extend('#exportSigning')
     const error = keysError.extend('#exportSigning')
+    log('exportSigning')
     try {
       this.#exportedSigning = {}
       this.#exportedSigning.jwk = await subtle.exportKey('jwk', this.#signing.publicKey)
@@ -166,14 +170,18 @@ class CryptoKeys {
       throw new Error(e)
     }
     try {
-      this.#exportedSigning.public = this.#pubToPem(await subtle.exportKey('spki', this.#signing.publicKey))
+      this.#exportedSigning.public = this.#pubToPem(
+        await subtle.exportKey('spki', this.#signing.publicKey),
+      )
     } catch (e) {
       error('Failed to export signing public key.')
       error(e)
       throw new Error(e)
     }
     try {
-      this.#exportedSigning.private = this.#priToPem(await subtle.exportKey('pkcs8', this.#signing.privateKey))
+      this.#exportedSigning.private = this.#priToPem(
+        await subtle.exportKey('pkcs8', this.#signing.privateKey),
+      )
     } catch (e) {
       error('Failed to export signing private key.')
       error(e)
@@ -183,6 +191,7 @@ class CryptoKeys {
 
   async #exportEncrypting() {
     const log = keysLog.extend('#exportEncrypting')
+    log('exporting encryption keys')
     const error = keysError.extend('#exportEncrypting')
     // log('export encrypyting: ', this.#encrypting)
     try {
@@ -197,14 +206,18 @@ class CryptoKeys {
       throw new Error(e)
     }
     try {
-      this.#exportedEncrypting.public = this.#pubToPem(await subtle.exportKey('spki', this.#encrypting.publicKey))
+      this.#exportedEncrypting.public = this.#pubToPem(
+        await subtle.exportKey('spki', this.#encrypting.publicKey),
+      )
     } catch (e) {
       error('Failed to export encrypting public key.')
       error(e)
       throw new Error(e)
     }
     try {
-      this.#exportedEncrypting.private = this.#priToPem(await subtle.exportKey('pkcs8', this.#encrypting.privateKey))
+      this.#exportedEncrypting.private = this.#priToPem(
+        await subtle.exportKey('pkcs8', this.#encrypting.privateKey),
+      )
     } catch (e) {
       error('Failed to export encrypting private key.')
       error(e)
@@ -213,7 +226,9 @@ class CryptoKeys {
   }
 
   #pubToPem(pub) {
-    let pubToPem = Buffer.from(String.fromCharCode(...new Uint8Array(pub)), 'binary').toString('base64')
+    this.log('pubToPem')
+    let pubToPem = Buffer.from(String.fromCharCode(...new Uint8Array(pub)), 'binary')
+      .toString('base64')
     pubToPem = pubToPem.match(/.{1,64}/g).join('\n')
     pubToPem = '-----BEGIN PUBLIC KEY-----\n'
       + `${pubToPem}\n`
@@ -222,7 +237,9 @@ class CryptoKeys {
   }
 
   #priToPem(pri) {
-    let priToPem = Buffer.from(String.fromCharCode(...new Uint8Array(pri)), 'binary').toString('base64')
+    this.log('priToPem')
+    let priToPem = Buffer.from(String.fromCharCode(...new Uint8Array(pri)), 'binary')
+      .toString('base64')
     priToPem = priToPem.match(/.{1,64}/g).join('\n')
     priToPem = '-----BEGIN PRIVATE KEY-----\n'
       + `${priToPem}\n`
@@ -232,6 +249,7 @@ class CryptoKeys {
 
   async #signRSA() {
     const log = keysLog.extend('signRSA')
+    log('signRSA')
     const error = keysError.extend('signRSA')
     let keys
     try {

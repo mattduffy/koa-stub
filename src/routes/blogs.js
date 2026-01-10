@@ -7,11 +7,11 @@
 
 import Router from '@koa/router'
 // import { ObjectId } from 'mongodb'
-import { Albums } from '@mattduffy/albums/Albums'
+// import { Albums } from '@mattduffy/albums/Albums'
 import { Blogs } from '@mattduffy/blogs'
 // import { Users } from '../models/users.js'
 import { _log, _error } from '../utils/logging.js'
-import { redis } from '../daos/impl/redis/redis-client.js'
+// import { redis } from '../daos/impl/redis/redis-client.js'
 
 const blogsLog = _log.extend('blogs')
 const blogsError = _error.extend('blogs')

@@ -53,7 +53,7 @@ dotenv.config({
   processEnv: appEnv,
   debug: showDebug,
 })
-let aiEnv = {}
+const aiEnv = {}
 dotenv.config({
   path: path.resolve(appRoot, 'config/ai.env'),
   processEnv: aiEnv,
@@ -129,7 +129,6 @@ const o = {
   db_name: mongoClient.dbname ?? appEnv.MONGODB_DBNAME ?? 'test',
 }
 
-app.use(banner.use())
 let isHTTPS
 log(`isHTTPS: ${isHTTPS}`)
 app.use(async (ctx, next) => {
@@ -182,7 +181,7 @@ async function proxyCheck(ctx, next) {
 }
 
 async function openGraph(ctx, next) {
-  const logg = log.extend('openGraph')
+  // const logg = log.extend('openGraph')
   // const err = error.extend('openGraph')
   const ogArray = []
   ogArray.push('<meta property="og:type" content="website">')
@@ -200,15 +199,15 @@ async function openGraph(ctx, next) {
   twitArray.push('<meta name="twitter:card" content="summary_large_image">')
   twitArray.push('<meta name="twitter:domain" content="mattmadethese.com">')
   twitArray.push('<meta name="twitter:url" content="'
-    + `${ctx.request.href}${ctx.request.search}">`
-  )
+    + `${ctx.request.href}${ctx.request.search}">`)
+
   twitArray.push('<meta name="twitter:image" content="'
-    + `${ctx.state.origin}/i/plane-450x295.jpg">`
-  )
+    + `${ctx.state.origin}/i/plane-450x295.jpg">`)
+
   twitArray.push('<meta name="twitter:title" content="Matt Made These.">')
   twitArray.push('<meta name="twitter:description" content='
-    + '"Things that Matt made.">'
-  )
+    + '"Things that Matt made.">')
+
   ctx.state.openGraph = ogArray.concat(twitArray).join('\n')
   // logg(ctx.state.openGraph)
   await next()
@@ -249,8 +248,8 @@ async function csp(ctx, next) {
   } catch (e) {
     err(e)
     // ctx.throw(500, 'Rethrown in CSP middleware', e)
-    const err = new Error('Rethrown in CSP middleware', { cause: e })
-    ctx.throw(500, err)
+    const csperror = new Error('Rethrown in CSP middleware', { cause: e })
+    ctx.throw(500, csperror)
   }
 }
 
@@ -398,6 +397,7 @@ async function logRequest(ctx, next) {
 
 app.use(isMongo)
 app.use(logRequest)
+app.use(banner.use())
 app.use(viewGlobals)
 app.use(openGraph)
 app.use(errors)

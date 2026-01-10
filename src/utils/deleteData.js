@@ -13,8 +13,9 @@ import { redis_single as redis } from '../daos/impl/redis/redis-single.js'
 import { _log, _error } from './logging.js'
 /* eslint-enable import/no-extraneous-dependencies */
 
-const log = _log.extend('utils:delete-data')
-const error = _error.extend('utils:delete-data')
+const log = _log.extend('utils:load-data')
+const error = _error.extend('utils:load-data')
+const info = _log.extend('utils:load-data')
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -45,7 +46,7 @@ const options = program.opts()
 options.dbPrefix = DB_PREFIX
 log('options:', options)
 
-let keyPath = options?.keyPrefix ?? options.dbPrefix
+const keyPath = options?.keyPrefix ?? options.dbPrefix
 log(`full keyPath: ${keyPath}:${options.keyName}`)
 log(`redis.options.keyPrefix: ${redis.options.keyPrefix}`)
 // process.exit()
@@ -58,13 +59,15 @@ async function del() {
     COUNT: options.keyCount,
   }
   log(scanArgs)
-  let myIterator = await redis.scanIterator(scanArgs)
+  const myIterator = await redis.scanIterator(scanArgs)
   let batch
   let count = 0
+  // eslint-disable-next-line
   while (batch = await myIterator.next()) {
     if (batch.done) {
       break
     }
+    // eslint-disable-next-line
     for await (const k of batch.value) {
       let deleted
       if (options.keyType === 'ReJSON-RL') {
@@ -73,18 +76,17 @@ async function del() {
         } else {
           log(`DRY-RUN: redis.json.del(${k})`)
         }
+      }
+      if (!options.dryRun) {
+        deleted = await redis.del(k)
       } else {
-        if (!options.dryRun) {
-          deleted = await redis.del(k)
-        } else {
-          log(`DRY-RUN: redis.del(${k})`)
-        }
+        log(`DRY-RUN: redis.del(${k})`)
       }
       console.log('deleted', k, deleted)
       count += 1
     }
   }
-  return count 
+  return count
 }
 try {
   const result = await del()
