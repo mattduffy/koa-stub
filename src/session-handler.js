@@ -49,7 +49,7 @@ const redisConnOpts = {
       ca: await fs.readFileSync(redisEnv.REDIS_CACERT),
     },
   },
-  nodeClientOptions: {       
+  nodeClientOptions: {
     username: redisEnv.REDIS_USER,
     password: redisEnv.REDIS_PASSWORD,
     socket: {
@@ -64,9 +64,7 @@ const redisConnOpts = {
   role: 'master',
 }
 const redis = await redisStore.init(redisConnOpts)
-console.log(
-  'did redisStore init work?', await redis.ping()
-)
+console.log('did redisStore init work?', await redis.ping())
 
 const config = {
   store: redis,

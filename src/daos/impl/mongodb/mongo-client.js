@@ -2,7 +2,7 @@
  * @module @mattduffy/koa-stub
  * @author Matthew Duffy <mattduffy@gmail.com>
  * @summary The low-level connection object of mongodb.
- * @file src/daos/impl/mongodb/mongo-client.js The low-level connection object of mongodb.
+ * @file src/daos/impl/mongodb/mongo-client.js
  */
 
 import path from 'node:path'
@@ -19,7 +19,7 @@ const mongoEnv = {}
 Dotenv.config({ path: mongodbEnvPath, processEnv: mongoEnv, debug: showDebug })
 
 const clientDn = mongoEnv.MONGODB_CLIENT_DN
-const dbHost = mongoEnv.MONGODB_HOST
+// const dbHost = mongoEnv.MONGODB_HOST
 const dbHost2 = mongoEnv.MONGODB_HOST_2
 const dbHost3 = mongoEnv.MONGODB_HOST_3
 const dbHost4 = mongoEnv.MONGODB_HOST_4
@@ -43,6 +43,7 @@ const uri = `mongodb://${clientDn}`
   + `&authSource=${authSource}`
   + `&appName=${appName}`
 
+// console.log('mongodb uri is: ', uri)
 // console.log('mongo-client.js >> root = ', root)
 // console.log(`mongo-client env path: ${mongodbEnvPath}`)
 // console.log(`MongoDB host: ${dbHost}`)

@@ -41,7 +41,7 @@ const redisConnOpts = {
       ca: await fs.readFile(redisEnv.REDIS_CACERT),
     },
   },
-  nodeClientOptions: {       
+  nodeClientOptions: {
     username: redisEnv.REDIS_USER,
     password: redisEnv.REDIS_PASSWORD,
     socket: {
@@ -63,7 +63,7 @@ try {
     .on('reconnecting', () => {
       console.log('Redis sentinel reconnecting')
     })
-    .on('error', err => console.error('Redis Sentinel Error', err))
+    .on('error', (err) => console.error('Redis Sentinel Error', err))
     .on('ready', () => { console.log('Redis sentinel connection is ready') })
 
   await sentinel.connect()
