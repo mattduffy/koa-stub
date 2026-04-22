@@ -789,7 +789,7 @@ router.get('accountEditGallery', '/account/gallery/:id', hasFlash, async (ctx) =
       // origin: `${ctx.request.origin}`,
       jwtAccess: (ctx.state.sessionUser.jwts).token,
       csrfToken,
-      title: `${ctx.app.site}: View ALbum Details`,
+      title: `${ctx.app.site}: View Album Details`,
     }
     await ctx.render('account/user-gallery-edit', locals)
   }
