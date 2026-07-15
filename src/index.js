@@ -324,6 +324,8 @@ async function viewGlobals(ctx, next) {
 async function logRequest(ctx, next) {
   const logg = log.extend('logRequest')
   const err = error.extend('logRequest')
+  const logEntry = {}
+  const geos = []
   try {
     /* eslint-disable-next-line */
     const ignore = ['favicon', 'c/.+\.css', 'j/*.js']
@@ -335,17 +337,16 @@ async function logRequest(ctx, next) {
     if (ignore.find(find) === undefined) {
       const db = ctx.state.mongodb.client.db(ctx.state.mongodb.client.dbName)
       const mainLog = db.collection('mainLog')
-      const logEntry = {}
-      // logEntry.remoteIps = ctx.request.ips
-      const geos = []
+      logEntry.remoteIps = ctx.request.ips
       if (geoIPCity && ctx.request.ips) {
         try {
-          if (Array.isArray(ctx.request.ips)) {
-            logEntry.remoteIps = ctx.request.ips
+          if (Array.isArray(ctx.request.ips) && ctx.request.ips.length > 0) {
             ctx.request.ips.forEach((ip, i) => {
-              const city = geoIPCity.city(ip)
+              // Find IPv6 addresses with ::ffff prefix that is just masking an IPv4 address.
+              const _ip = /^::ffff:(?<ip4>.*)$/.exec(ip)?.groups.ip4 ?? ip
+              const city = geoIPCity.city(_ip)
               const geo = {}
-              geo.ip = ip
+              geo.ip = _ip
               geo.country = city?.country?.names?.en
               geo.city = city?.city?.names?.en
               geo.subdivision = city?.subdivisions?.[0]?.names?.en
@@ -353,13 +354,13 @@ async function logRequest(ctx, next) {
               geo.coords = [city?.location?.latitude, city?.location?.longitude]
               logEntry[`geo_${i}`] = geo
               geos.push(geo)
-              logg('Request ip geo:     %O', geo)
+              // logg('Request ip geo:     %O', geo)
             })
           } else {
-            logEntry.remoteIps = ctx.request.ips
             const city = geoIPCity.city(ctx.request.ip)
             const geo = {}
-            geo.ip = ctx.request.ip
+            // Find IPv6 addresses with ::ffff prefix that is just masking an IPv4 address.
+            geo.ip = /^::ffff:(?<ip4>.*)$/.exec(ctx.request.ip)?.groups.ip4 ?? ctx.request.ip
             geo.country = city?.country?.names?.en
             geo.city = city?.city?.names?.en
             geo.subdivision = city?.subdivisions?.[0]?.names?.en
@@ -367,10 +368,10 @@ async function logRequest(ctx, next) {
             geo.coords = [city?.location?.latitude, city?.location?.longitude]
             logEntry.geo = geo
             geos.push(geo)
-            logg('Request ip geo:     %O', geo)
+            // logg('Request ip geo:     %O', geo)
           }
         } catch (e) {
-          err(e.message)
+          err('logEntry error: ', e.message)
         }
       } else {
         logg(`failed to log ip geo for ${ctx.request.ips}`)
@@ -381,13 +382,16 @@ async function logRequest(ctx, next) {
       logEntry.httpVersion = `${ctx.req.httpVersionMajor}.${ctx.req.httpVersionMinor}`
       logEntry.referer = ctx.request.headers?.referer
       logEntry.userAgent = ctx.request.headers['user-agent']
-      ctx.state.logEntry = { ip: logEntry.remoteIps, geos }
+      ctx.state.logEntry = {
+        ip: (geos.length > 0 && geos[0]?.ip) ? geos[0].ip : ctx.request.ip,
+        geos,
+      }
       await mainLog.insertOne(logEntry)
     }
     logg(`Request href:        ${ctx.request.href}`)
     logg(`Request remote ips:  ${ctx.request.ips}`)
     logg(`Request remote ip:   ${ctx.request.ip}`)
-    logg('Request headers:     %O', ctx.request.headers)
+    logg('Request user-agent:  %O', ctx.request.headers['user-agent'])
     logg('Request querystring: %O', ctx.request.query)
     await next()
   } catch (e) {
