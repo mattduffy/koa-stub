@@ -25,7 +25,9 @@ if (cluster.isPrimary) {
     cluster.fork()
   }
   cluster.on('exit', (worker, code, signal) => {
-    console.warn(`cluster:primary:${cluster.pid} worker process ${worker.pid} died with signal: ${signal}.`)
+    console.warn(
+      `cluster:primary:${cluster.pid} worker process ${worker.pid} died with signal: ${signal}.`,
+    )
     if (cluster.workers.length < numCores) {
       console.warn(`cluster:primary:${cluster.pid} Forking a new work to replace it.`)
       cluster.fork()
