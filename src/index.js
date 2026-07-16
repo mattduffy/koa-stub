@@ -388,8 +388,12 @@ async function logRequest(ctx, next) {
       }
       await mainLog.insertOne(logEntry)
     }
+    const remoteIps = (logEntry?.geos && logEntry.geos.length > 0)
+      ? logEntry.geos[0].ip
+      : ctx.request.ips
+    logg('geos:                %O', geos)
     logg(`Request href:        ${ctx.request.href}`)
-    logg(`Request remote ips:  ${ctx.request.ips}`)
+    logg(`Request remote ips:  ${remoteIps}`)
     logg(`Request remote ip:   ${ctx.request.ip}`)
     logg('Request user-agent:  %O', ctx.request.headers['user-agent'])
     logg('Request querystring: %O', ctx.request.query)
