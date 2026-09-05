@@ -81,6 +81,8 @@ app.domain = appEnv.DOMAIN_NAME ?? 'website.com'
 app.host = `${appEnv.HOST}:${port}` ?? `127.0.0.1:${port}`
 app.origin = app.host
 app.securityContact = appEnv.SECURITY_CONTACT ?? `security@${app.domain}`
+app.securityExpires = (new Date(appEnv.SECURITY_EXPIRES)).toISOString()
+  ?? (new Date((new Date()).setFullYear((new Date()).getFullYear() + 1))).toISOString()
 app.securityGpg = appEnv.SECURITY_GPG ?? 'GPG public key missing'
 app.appEnv = appEnv
 

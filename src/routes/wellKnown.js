@@ -22,7 +22,7 @@ router.get('security', '/.well-known/security.txt', async (ctx) => {
   info('Somebody asked for the security.txt file.')
   const securityTxt = []
   securityTxt.push(`Contact: mailto:${ctx.app.securityContact}`)
-  securityTxt.push('Expires: 2025-12-31T23:59:00.000Z')
+  securityTxt.push(`Expires: ${ctx.app.securityExpires}`)
   securityTxt.push(`Encryption: ${ctx.app.securityGpg}`)
   securityTxt.push('Preferred-Languages: en')
   securityTxt.push(`Canonical: ${ctx.state.origin}/.well-known/security.txt`)
