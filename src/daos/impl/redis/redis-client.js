@@ -55,21 +55,22 @@ const redisConnOpts = {
   lazyConnect: true,
   role: 'master',
   keyPrefix: `${redisEnv.REDIS_KEY_PREFIX}:` ?? 'koa:',
+  // RESP: 3,
+  // unstableResp3: true,
 }
-console.log(redisConnOpts)
-let sentinel
+// console.log(redisConnOpts)
+let _sentinel
 try {
-  sentinel = await createSentinel(redisConnOpts)
-    .on('reconnecting', () => {
-      console.log('Redis sentinel reconnecting')
-    })
-    .on('error', (err) => console.error('Redis Sentinel Error', err))
+  _sentinel = await createSentinel(redisConnOpts)
+    .on('reconnecting', () => { console.log('Redis sentinel reconnecting') })
+    .on('error', (err) => { console.error('Redis Sentinel Error', err) })
     .on('ready', () => { console.log('Redis sentinel connection is ready') })
 
-  await sentinel.connect()
+  await _sentinel.connect()
 } catch (e) {
   console.log(e)
 }
+const sentinel = _sentinel
 export {
   sentinel as redis,
 }
