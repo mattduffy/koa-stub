@@ -23,6 +23,14 @@ Dotenv.config({
   debug: showDebug,
 })
 
+function reconnectStrategy(retries, cause) {
+  console.log(`Redis reconnectStrategy(${retries}, cause)`)
+  if (cause) {
+    console.log('client lost redis connection because:', cause)
+  }
+  return retries
+}
+
 const sentinelPort = redisEnv.REDIS_SENTINEL_PORT ?? 26379
 const redisConnOpts = {
   sentinelRootNodes: [
@@ -39,6 +47,7 @@ const redisConnOpts = {
       tls: true,
       rejectUnauthorized: false,
       ca: await fs.readFile(redisEnv.REDIS_CACERT),
+      reconnectStrategy,
     },
   },
   nodeClientOptions: {
@@ -48,6 +57,7 @@ const redisConnOpts = {
       tls: true,
       rejectUnauthorized: false,
       ca: await fs.readFile(redisEnv.REDIS_CACERT),
+      reconnectStrategy,
     },
   },
   sentinelRetryDelayOnFailover: 100,
