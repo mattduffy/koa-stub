@@ -47,6 +47,13 @@ const redisConnOpts = {
       tls: true,
       rejectUnauthorized: false,
       ca: await fs.readFileSync(redisEnv.REDIS_CACERT),
+      reconnectStrategy: (retries, cause) => {
+        console.log(`Redis session client reconnectStrategy(${retries}, cause)`)
+        console.log(cause)
+        const jitter = Math.floor(Math.random() * 200)
+        const delay = Math.min((2 ** retries) * 50, 2000)
+        return delay + jitter
+      },
     },
   },
   nodeClientOptions: {
@@ -56,6 +63,13 @@ const redisConnOpts = {
       tls: true,
       rejectUnauthorized: false,
       ca: await fs.readFileSync(redisEnv.REDIS_CACERT),
+      reconnectStrategy: (retries, cause) => {
+        console.log(`Redis session client reconnectStrategy(${retries}, cause)`)
+        console.log(cause)
+        const jitter = Math.floor(Math.random() * 200)
+        const delay = Math.min((2 ** retries) * 50, 2000)
+        return delay + jitter
+      },
     },
   },
   sentinelRetryDelayOnFailover: 100,
